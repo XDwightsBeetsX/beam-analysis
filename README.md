@@ -1,4 +1,4 @@
-# beam-analysis  :construction_worker  
+# beam-analysis  :construction_worker:  
 
 [![Build Status](https://travis-ci.com/XDwightsBeetsX/beam-analysis.svg?token=ojR96vWaxNB8o4NF9oGN&branch=master)](https://travis-ci.com/XDwightsBeetsX/beam-analysis)  
 Perform engineering analysis on beams with diagrams for shear, moments, angle, and deflection  
@@ -17,7 +17,7 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 
 ### Build Requirements
 
-- Check the `requirements.txt`
+- Check the `requirements.txt`:
   - `numpy`
   - `matplotlib`
 
