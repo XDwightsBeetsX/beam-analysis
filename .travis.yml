@@ -16,8 +16,6 @@ deploy:
   password: "pypi-AgENdGVzdC5weXBpLm9yZwIkNGU3MzY3NGItOGY5Ni00NDZlLWE2NzgtMjAxOTIxMjhiNDMzAAIleyJwZXJtaXNzaW9ucyI6ICJ1c2VyIiwgInZlcnNpb24iOiAxfQAABiBvAVdC_xd-Zxs_4hTpvlIEAqCOm0b1JrqHdDKonfvLLw"
     # secure: "pypi-AgENdGVzdC5weXBpLm9yZwIkNGU3MzY3NGItOGY5Ni00NDZlLWE2NzgtMjAxOTIxMjhiNDMzAAIleyJwZXJtaXNzaW9ucyI6ICJ1c2VyIiwgInZlcnNpb24iOiAxfQAABiBvAVdC_xd-Zxs_4hTpvlIEAqCOm0b1JrqHdDKonfvLLw"
   skip_cleanup: true
-  # on:
-  #   repo: XDwightsBeetsX/beam-analysis
-  #   tags: true
-  #   all_branches: true
+  on:
+    tags: true
 
