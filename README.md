@@ -9,8 +9,6 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 pip install beam-analysis
 ```
 
-**currently at work*
-
 ### Continuous development using `twine`
 
 ```shell
