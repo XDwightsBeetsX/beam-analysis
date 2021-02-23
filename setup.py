@@ -23,23 +23,22 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README_FILE = f"{str(HERE)}\\README.md"
 README = (HERE / README_FILE).read_text()
+LONG_DESCR = README
 
 # The text of the REQUIREMENTS file
 REQUIREMENTS = []
 REQUIREMENTS_FILE = f"{str(HERE)}\\REQUIREMENTS.txt"
-print(f"Searching for requirements in '{REQUIREMENTS_FILE}'...")
 with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
     lines = req.readlines()
     for line in lines:
         if line[0] != "#" and line.strip() != "":
             REQUIREMENTS.append(line.strip())
-    print(f"Found requirements.")
 
-# GET README FOR LONG_DESCR
-print(f"Searching for readme in '{README_FILE}'...")
-with open(README_FILE, "r", encoding="utf-8") as readme:
-    LONG_DESCR = readme.read()
-    print(f"Found readme.")
+# # GET README FOR LONG_DESCR
+# print(f"Searching for readme in '{README_FILE}'...")
+# with open(README_FILE, "r", encoding="utf-8") as readme:
+#     LONG_DESCR = readme.read()
+#     print(f"Found readme.")
 
 # SETUP
 setup(
