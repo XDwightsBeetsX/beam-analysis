@@ -1,8 +1,15 @@
 import pathlib
-from setuptools import setup
+from setuptools import setup, find_packages
 
-# Package name
+# PACKAGE NAME
 PKGNAME = "beam-analysis"
+
+# AUTHOR
+AUTH = "John Gutierrez"
+
+# Short Description
+SHORT_DESCR = "Perform engineering analysis on a beam"
+LONG_DESCR = SHORT_DESCR  # placeholder
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -13,27 +20,25 @@ README = (HERE / "README.md").read_text()
 # The text of the REQUIREMENTS file
 REQUIREMENTS = (HERE / "REQUIREMENTS.txt").read_text()
 
-# This call to setup() does all the work
+# GET README FOR LONG_DESCR
+with open("README.md", "r", encoding="utf-8") as fh:
+    LONG_DESCR = fh.read()
+
+# SETUP
 setup(
     name=PKGNAME,
     version="1.0.0",
-    description="Perform engineering analysis on a beam",
-    long_description=README,
+    author=AUTH,
+    description=SHORT_DESCR,
+    long_description=LONG_DESCR,
     long_description_content_type="text/markdown",
     url="https://github.com/XDwightsBeetsX/beam-analysis",
-    author="John Gutierrez",
     license="MIT",
     classifiers=[
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8.5",
+        "Programming Language :: Python :: 3.8",
+        "License :: OSI Approved :: MIT License",
     ],
-    packages=[f"{PKGNAME}"],
-    include_package_data=True,
-    install_requires=REQUIREMENTS,
-    entry_points={
-        "console_scripts": [
-            f"{PKGNAME}=Beam.__main__:main",
-        ]
-    },
+    packages=find_packages(),
+    python_requires='>=3.6',
 )

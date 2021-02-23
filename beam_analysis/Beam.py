@@ -1,6 +1,5 @@
 """
 Deflection plotter for beams
-John Gutierrez
 """
 
 import numpy as np
@@ -180,13 +179,14 @@ class Beam(object):
         for k, v in self.ForcesAndMoments.items():
             print(f"{k}: {v}")
 
-    def evaluate(self, n=1000):
-        """Plots deflections and reports max deflection"""
+    def showParams(self):
         print(f"E = {self.E:.4f}Pa")
         print(f"I = {self.I:.4f}m^4")
         print(f"L = {self.L:.4f}m")
         
-        x = np.linspace(0, L, num=n)
+    def evaluate(self, n=1000):
+        """Plots deflections and reports max deflection"""       
+        x = np.linspace(0, self.L, num=n)
 
         # Data arrays
         beam = np.zeros(n)
@@ -255,41 +255,10 @@ class Beam(object):
         fig.tight_layout()
 
         # Report
-        print(f"Max shear:      {max_shear[1]:.4f}N @ {max_shear[0]:.4f}m")
-        print(f"Max moment:     {max_moment[1]:.4f}N-m @ {max_moment[0]:.4f}m")
-        print(f"Max angle:      {max_angle[1]:.4f}rad @ {max_angle[0]:.4f}m")
-        print(f"Max deflection: {max_deflection[1]:.4f}m @ {max_deflection[0]:.4f}m")
+        print(f"\nREPORT:")
+        print(f"Max shear:      {max_shear[1]:.4f} [N] @ {max_shear[0]:.4f}m")
+        print(f"Max moment:     {max_moment[1]:.4f} [N-m] @ {max_moment[0]:.4f}m")
+        print(f"Max angle:      {max_angle[1]:.4f} [rad] @ {max_angle[0]:.4f}m")
+        print(f"Max deflection: {max_deflection[1]:.4f} [m] @ {max_deflection[0]:.4f}m\n")
 
         plt.show()
-
-
-if __name__ == "__main__":
-    print("running...")
-    
-    # =============================== #
-    # ======== Youngs Modulus ======= #
-    # ====== Moment of Inertia ====== #
-    # ========= Beam Length ========= #
-    # =============================== #
-    E = 207 * 10**9
-    I = 2 * 10**-8
-    L = 1.0
-
-    # =============================== #
-    # = Make the beam and add loads = #
-    # =============================== #
-    B = Beam(E, I, L)
-    B.addPointLoad(0, 10)
-    B.addPointLoad(1, 10)
-    B.addPointLoad(.5, -20)
-
-    # =============================== #
-    # Double check your added loads = #
-    # =============================== #
-    # B.showForcesAndMoments()
-    
-
-    # =============================== #
-    # ==== Run Forrest Run!! ======== #
-    # =============================== #
-    B.evaluate()

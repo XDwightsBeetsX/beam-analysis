@@ -1,0 +1,13 @@
+# APIs
+pypi_test_key.txt
+pypi_key.txt
+
+# Dist and Build for packaging
+dist
+build
+.egg-info
+
+# Caches
+__pycache__
+
+# editing
