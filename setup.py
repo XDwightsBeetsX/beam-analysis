@@ -21,7 +21,7 @@ LONG_DESCR = SHORT_DESCR  # placeholder
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
-README_FILE = f"{str(HERE)}\\README.md"
+README_FILE = f"{str(HERE)}\\README.md".replace("\\", "/")
 print(f"Searching for readme in '{README_FILE}'...")
 with open(README_FILE, "r", encoding="utf-8") as readme:
     LONG_DESCR = readme.read()
@@ -29,7 +29,7 @@ with open(README_FILE, "r", encoding="utf-8") as readme:
 
 # The text of the REQUIREMENTS file
 REQUIREMENTS = []
-REQUIREMENTS_FILE = f"{str(HERE)}\\REQUIREMENTS.txt"
+REQUIREMENTS_FILE = f"{str(HERE)}\\REQUIREMENTS.txt".replace("\\", "/")
 print(f"Searching for requirements in '{REQUIREMENTS_FILE}'...")
 with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
     lines = req.readlines()
