@@ -2,17 +2,23 @@
 language: python
 
 python:
-  - "3.8"
+  "3.8"
 
 install:
-  - pip install -r requirements.txt
+  pip install -r requirements.txt
 
 script:
-  - pytest
+  pytest
+
+before_deploy:
+  "echo: 'start deploy?'"
 
 deploy:
   provider: pypi
   username: "__token__"
-  password:
-    secure: "pypi-AgENdGVzdC5weXBpLm9yZwIkNGU3MzY3NGItOGY5Ni00NDZlLWE2NzgtMjAxOTIxMjhiNDMzAAIleyJwZXJtaXNzaW9ucyI6ICJ1c2VyIiwgInZlcnNpb24iOiAxfQAABiBvAVdC_xd-Zxs_4hTpvlIEAqCOm0b1JrqHdDKonfvLLw"
+  password: "pypi-AgENdGVzdC5weXBpLm9yZwIkNGU3MzY3NGItOGY5Ni00NDZlLWE2NzgtMjAxOTIxMjhiNDMzAAIleyJwZXJtaXNzaW9ucyI6ICJ1c2VyIiwgInZlcnNpb24iOiAxfQAABiBvAVdC_xd-Zxs_4hTpvlIEAqCOm0b1JrqHdDKonfvLLw"
   skip_cleanup: true
+  skip_existing: true
+
+after_deploy:
+  "echo: 'deploy finished.'"
