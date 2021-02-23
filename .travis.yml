@@ -1,3 +1,4 @@
+# Upon a push to master, runs tests and deploys to PyPi
 language: python
 
 python:
