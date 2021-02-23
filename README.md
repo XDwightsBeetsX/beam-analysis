@@ -1,8 +1,9 @@
 # beam-analysis  :construction_worker  
 
+[![Build Status](https://travis-ci.com/XDwightsBeetsX/beam-analysis.svg?token=ojR96vWaxNB8o4NF9oGN&branch=master)](https://travis-ci.com/XDwightsBeetsX/beam-analysis)  
 Perform engineering analysis on beams with diagrams for shear, moments, angle, and deflection  
 
-### Usage
+## Usage
 
 ```pip install beam-analysis```  
 *currently at work*

@@ -15,13 +15,13 @@ LONG_DESCR = SHORT_DESCR  # placeholder
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
-README = (HERE / "readme.md").read_text()
+README = (HERE / "README.md").read_text()
 
 # The text of the REQUIREMENTS file
-REQUIREMENTS = (HERE / "requirements.txt").read_text()
+REQUIREMENTS = (HERE / "REQUIREMENTS.txt").read_text()
 
 # GET README FOR LONG_DESCR
-with open("readme.md", "r", encoding="utf-8") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     LONG_DESCR = fh.read()
 
 # SETUP
