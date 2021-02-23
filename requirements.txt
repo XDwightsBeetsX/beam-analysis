@@ -1,3 +1,6 @@
 # Required packages
 numpy
 matplotlib
+
+# Testing
+pytest
