@@ -10,6 +10,9 @@ V = "1.0.0"
 # AUTHOR
 AUTH = "John Gutierrez"
 
+# Keywords about the pkg
+KEYWORDS = ['beam', 'analysis', 'engineering']
+
 # Short Description
 SHORT_DESCR = "Perform engineering analysis on a beam"
 LONG_DESCR = SHORT_DESCR  # placeholder
@@ -18,21 +21,25 @@ LONG_DESCR = SHORT_DESCR  # placeholder
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
-README_FILE = "README.md"
+README_FILE = f"{str(HERE)}\\README.md"
 README = (HERE / README_FILE).read_text()
 
 # The text of the REQUIREMENTS file
 REQUIREMENTS = []
-REQUIREMENTS_FILE = f"{str(HERE)}/REQUIREMENTS.txt"
+REQUIREMENTS_FILE = f"{str(HERE)}\\REQUIREMENTS.txt"
+print(f"Searching for requirements in '{REQUIREMENTS_FILE}'...")
 with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
     lines = req.readlines()
     for line in lines:
         if line[0] != "#" and line.strip() != "":
             REQUIREMENTS.append(line.strip())
+    print(f"Found requirements.")
 
 # GET README FOR LONG_DESCR
+print(f"Searching for readme in '{README_FILE}'...")
 with open(README_FILE, "r", encoding="utf-8") as readme:
     LONG_DESCR = readme.read()
+    print(f"Found readme.")
 
 # SETUP
 setup(
@@ -44,6 +51,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/XDwightsBeetsX/beam-analysis",
     license="MIT",
+    keywords=KEYWORDS,
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",

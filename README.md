@@ -5,8 +5,18 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 
 ## Usage
 
-```pip install beam-analysis```  
-*currently at work*
+```shell
+pip install beam-analysis
+```
+
+**currently at work*
+
+### Continuous development using `twine`
+
+```shell
+python setup.py sdist
+twine upload dist/*
+```
 
 ### Mechanical Requirements
 
