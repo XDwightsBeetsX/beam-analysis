@@ -253,13 +253,14 @@ class Beam(object):
         ax[1,1].set(xlabel=xlabel, title=t4)
 
         fig.tight_layout()
-        plt.show()
 
         # Report
         print(f"Max shear:      {max_shear[1]:.4f}N @ {max_shear[0]:.4f}m")
         print(f"Max moment:     {max_moment[1]:.4f}N-m @ {max_moment[0]:.4f}m")
         print(f"Max angle:      {max_angle[1]:.4f}rad @ {max_angle[0]:.4f}m")
         print(f"Max deflection: {max_deflection[1]:.4f}m @ {max_deflection[0]:.4f}m")
+
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -272,7 +273,7 @@ if __name__ == "__main__":
     # =============================== #
     E = 207 * 10**9
     I = 2 * 10**-8
-    L = 1
+    L = 1.0
 
     # =============================== #
     # = Make the beam and add loads = #
@@ -280,9 +281,7 @@ if __name__ == "__main__":
     B = Beam(E, I, L)
     B.addPointLoad(0, 10)
     B.addPointLoad(1, 10)
-    B.addPointLoad(.25, -10)
-    B.addPointLoad(.75, -10)
-    B.addDistributedLoad(0, .5, 15)
+    B.addPointLoad(.5, -20)
 
     # =============================== #
     # Double check your added loads = #
