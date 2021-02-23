@@ -17,5 +17,4 @@ deploy:
     # secure: "pypi-AgENdGVzdC5weXBpLm9yZwIkNGU3MzY3NGItOGY5Ni00NDZlLWE2NzgtMjAxOTIxMjhiNDMzAAIleyJwZXJtaXNzaW9ucyI6ICJ1c2VyIiwgInZlcnNpb24iOiAxfQAABiBvAVdC_xd-Zxs_4hTpvlIEAqCOm0b1JrqHdDKonfvLLw"
   skip_cleanup: true
   on:
-    tags: true
-
+    branch: master
