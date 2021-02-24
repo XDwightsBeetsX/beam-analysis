@@ -21,5 +21,8 @@ jobs:
     skip_cleanup: true
     skip_existing: true
     on:
-      tags: true  # May want to disable to ease deployment
+      tags: false
       branch: master
+    - name: Clean
+      run: |
+        rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info

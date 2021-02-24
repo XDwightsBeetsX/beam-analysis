@@ -10,14 +10,14 @@ V = "1.0.0"
 # AUTHOR
 AUTH = "John Gutierrez"
 
-# Keywords about the pkg
+# The directory containing this file
+HERE = pathlib.Path(__file__).parent
+
+# KEYWORDS about the pkg
 KEYWORDS = ['beam', 'analysis', 'engineering']
 
 # Short Description
 SHORT_DESCR = "Perform engineering analysis on a beam"
-
-# The directory containing this file
-HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
 README_FILE = f"{str(HERE)}\\README.md".replace("\\", "/")
@@ -36,6 +36,7 @@ with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
         if line[0] != "#" and line.strip() != "":
             REQUIREMENTS.append(line.strip())
     print(f"Found requirements.")
+
 
 # SETUP
 setup(
