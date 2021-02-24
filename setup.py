@@ -10,9 +10,6 @@ V = "1.0.0"
 # AUTHOR
 AUTH = "John Gutierrez"
 
-# The directory containing this file
-HERE = pathlib.Path(__file__).parent
-
 # KEYWORDS about the pkg
 KEYWORDS = ['beam', 'analysis', 'engineering']
 
@@ -20,7 +17,7 @@ KEYWORDS = ['beam', 'analysis', 'engineering']
 SHORT_DESCR = "Perform engineering analysis on a beam"
 
 # The text of the README file
-README_FILE = str(HERE) + "/readme.md"
+README_FILE = "readme.md"
 print(f"[LOG] - Searching for readme: '{README_FILE}'")
 with open(README_FILE, "r", encoding="utf-8") as readme:
     LONG_DESCR = readme.read()
@@ -28,7 +25,7 @@ with open(README_FILE, "r", encoding="utf-8") as readme:
 
 # The text of the REQUIREMENTS file
 REQUIREMENTS = []
-REQUIREMENTS_FILE = str(HERE) + "/requirements.txt"
+REQUIREMENTS_FILE = "requirements.txt"
 print(f"[LOG] - Searching for requirements: '{REQUIREMENTS_FILE}'")
 with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
     lines = req.readlines()
