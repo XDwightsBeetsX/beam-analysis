@@ -21,21 +21,21 @@ SHORT_DESCR = "Perform engineering analysis on a beam"
 
 # The text of the README file
 README_FILE = f"{str(HERE)}\\README.md".replace("\\", "/")
-print(f"Searching for readme in '{README_FILE}'...")
+print(f"[LOG] - Searching for readme in '{HERE}'...")
 with open(README_FILE, "r", encoding="utf-8") as readme:
     LONG_DESCR = readme.read()
-    print(f"Found readme.")
+    print(f"[LOG] - Found readme.")
 
 # The text of the REQUIREMENTS file
 REQUIREMENTS = []
 REQUIREMENTS_FILE = f"{str(HERE)}\\REQUIREMENTS.txt".replace("\\", "/")
-print(f"Searching for requirements in '{REQUIREMENTS_FILE}'...")
+print(f"[LOG] - Searching for requirements in '{HERE}'...")
 with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
     lines = req.readlines()
     for line in lines:
         if line[0] != "#" and line.strip() != "":
             REQUIREMENTS.append(line.strip())
-    print(f"Found requirements.")
+    print(f"[LOG] - Found requirements.")
 
 
 # SETUP
