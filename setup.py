@@ -15,7 +15,6 @@ KEYWORDS = ['beam', 'analysis', 'engineering']
 
 # Short Description
 SHORT_DESCR = "Perform engineering analysis on a beam"
-LONG_DESCR = SHORT_DESCR  # placeholder
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent

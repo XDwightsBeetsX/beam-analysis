@@ -94,7 +94,6 @@ class Beam(object):
             elif ty == 'M':
                 if start <= x:
                     # apply load
-                    eff = x - start
                     m += v
             else:
                 raise Exception(f"Invalid Force/Moment key: '{k}'")
