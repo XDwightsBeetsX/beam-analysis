@@ -16,23 +16,23 @@ stages:
   - name: clean
     if: branch = master
 
-test-job:
-  stage: test
-  script:
-    - pytest
-
-deploy-test-job:
-  stage: deploy
-  script:
-    - python setup.py sdist bdist_wheel
-    - twine upload -r testpypi dist/* -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
-deploy-job:
-  stage: deploy
-  script:
-    - python setup.py sdist bdist_wheel
-    - twine upload dist/* -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
-
-clean-job:
-  stage: clean
-  script:
-    rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
+jobs:
+  include:
+    - stage: Unit tests
+      script: pytest
+    
+    - stage: Deploy to PyPi
+      script: python setup.py sdist bdist_wheel
+      deploy:
+        provider: pypi
+        username: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_PASSWORD }}
+        cleanup: true
+        skip_existing: true
+        on:
+          branch: master
+          tags: false
+        
+    - stage: Clean
+      script:
+        rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
