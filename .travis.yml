@@ -1,5 +1,5 @@
 # Runs tests and deploys to PyPi
-# Only occurs on a tagged push to master
+# Only occurs on a tagged push to master 
 
 language: python
 
