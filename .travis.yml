@@ -12,21 +12,18 @@ dist: xenial
 install:
   pip install -r requirements.txt
 
-jobs:
-  include:
-    - stage: "Tests"
-      name: "Travis tests"
-      script: pytest
-    deploy:
-      name: "Deploy to PyPi"
-      provider: pypi
-      username: ${{ secrets.PYPI_USERNAME }}
-      password: ${{ secrets.PYPI_PASSWORD }}
-      skip_cleanup: true
-      skip_existing: true
-      on:
-        branch: master
-        # tags: true
-    # - name: Clean
-    #   run: |
-    #     rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
+script: pytest
+
+deploy:
+  name: "Deploy to PyPi"
+  provider: pypi
+  username: ${{ secrets.PYPI_USERNAME }}
+  password: ${{ secrets.PYPI_PASSWORD }}
+  cleanup: true
+  skip_existing: true
+  on:
+    branch: master
+    tags: true
+
+script:
+  rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
