@@ -1,8 +1,0 @@
-README.md
-setup.py
-beam_analysis/Beam.py
-beam_analysis/__init__.py
-beam_analysis.egg-info/PKG-INFO
-beam_analysis.egg-info/SOURCES.txt
-beam_analysis.egg-info/dependency_links.txt
-beam_analysis.egg-info/top_level.txt
