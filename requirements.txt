@@ -6,3 +6,6 @@ matplotlib
 
 # Testing
 pytest
+
+# Deployment
+twine

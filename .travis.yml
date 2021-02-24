@@ -9,15 +9,30 @@ install: pip install -r requirements.txt
 
 script: pytest
 
-deploy:
-  provider: pypi
-  username: ${{ secrets.PYPI_USERNAME }}
-  password: ${{ secrets.PYPI_PASSWORD }}
-  cleanup: true
-  skip_existing: true
-  on:
-    branch: master
-    tags: false
+stages:
+  - test
+  - name: deploy
+    if: branch = master
+  - name: clean
+    if: branch = master
 
-script:
-  rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
+test-job:
+  stage: test
+  script:
+    - pytest
+
+deploy-test-job:
+  stage: deploy
+  script:
+    - python setup.py sdist bdist_wheel
+    - twine upload -r testpypi dist/* -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
+deploy-job:
+  stage: deploy
+  script:
+    - python setup.py sdist bdist_wheel
+    - twine upload dist/* -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
+
+clean-job:
+  stage: clean
+  script:
+    rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info

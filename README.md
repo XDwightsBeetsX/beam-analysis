@@ -20,7 +20,7 @@ git clone https://github.com/XDwightsBeetsX/beam-analysis
 ### Continuous development using `twine`
 
 ```shell
-python setup.py sdist
+python setup.py sdist bdist_wheel
 twine upload dist/*
 ```
 
