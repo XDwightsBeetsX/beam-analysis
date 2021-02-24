@@ -10,14 +10,19 @@ install: pip install -r requirements.txt
 script: pytest
 
 stages:
-  - test
-  - name: deploy
+  - Orient
+  - Test
+  - name: Deploy
     if: branch = master
-  - name: clean
+  - name: Clean
     if: branch = master
 
 jobs:
   include:
+    - stage: Orient
+      script:
+        pwd
+        tree
     - stage: Unit tests
       script: pytest
     
