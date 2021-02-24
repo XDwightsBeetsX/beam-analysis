@@ -21,7 +21,7 @@ SHORT_DESCR = "Perform engineering analysis on a beam"
 
 # The text of the README file
 README_FILE = f"{str(HERE)}\\README.md".replace("\\", "/")
-print(f"[LOG] - Searching for readme in '{HERE}'...")
+print(f"[LOG] - Searching for readme in '{README_FILE}'...")
 with open(README_FILE, "r", encoding="utf-8") as readme:
     LONG_DESCR = readme.read()
     print(f"[LOG] - Found readme.")
@@ -29,7 +29,7 @@ with open(README_FILE, "r", encoding="utf-8") as readme:
 # The text of the REQUIREMENTS file
 REQUIREMENTS = []
 REQUIREMENTS_FILE = f"{str(HERE)}\\REQUIREMENTS.txt".replace("\\", "/")
-print(f"[LOG] - Searching for requirements in '{HERE}'...")
+print(f"[LOG] - Searching for requirements in '{REQUIREMENTS_FILE}'...")
 with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
     lines = req.readlines()
     for line in lines:
@@ -54,6 +54,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
     ],
-    packages=find_packages(),
+    install_requires=REQUIREMENTS,
+    packages=find_packages(exclude=("tests",)),
     python_requires='>=3.6',
 )

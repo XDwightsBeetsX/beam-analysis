@@ -16,18 +16,19 @@ stages:
     if: branch = master
   - name: Clean
     if: branch = master
+  - name: Verify Clean
 
 jobs:
   include:
     - stage: Orient
       script:
-        pwd
-        tree
+        - pwd
+        - tree
     - stage: Unit tests
       script: pytest
     
     - stage: Deploy to PyPi
-      script: python setup.py sdist bdist_wheel
+      script: python setup.py sdist
       deploy:
         provider: pypi
         username: ${{ secrets.PYPI_USERNAME }}
@@ -41,3 +42,8 @@ jobs:
     - stage: Clean
       script:
         rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
+    
+        - stage: Verify Clean
+      script:
+        - pwd
+        - tree
