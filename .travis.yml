@@ -17,8 +17,8 @@ script: pytest
 deploy:
   name: "Deploy to PyPi"
   provider: pypi
-  username: ${{ secrets.PYPI_USERNAME }}
-  password: ${{ secrets.PYPI_PASSWORD }}
+  username: ${ secrets.PYPI_USERNAME }
+  password: ${ secrets.PYPI_PASSWORD }
   cleanup: true
   skip_existing: true
   on:
