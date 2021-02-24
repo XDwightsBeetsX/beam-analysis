@@ -23,7 +23,7 @@ deploy:
   skip_existing: true
   on:
     branch: master
-    tags: true
+    tags: false
 
 script:
   rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
