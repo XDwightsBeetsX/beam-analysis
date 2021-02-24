@@ -9,16 +9,6 @@ install: pip install -r requirements.txt
 
 script: pytest
 
-stages:
-  - Orient
-  - Test
-  - Deploy-Test
-  - Deploy
-    if: branch = master
-  - Clean
-    if: branch = master
-  - Verify Clean
-
 jobs:
   include:
     - stage: Orient
@@ -32,20 +22,13 @@ jobs:
     - stage: Deploy-Test
       script:
         - python setup.py sdist bdist_wheel
-        - twine upload -r testpypi dist/*
+        - twine upload dist/* -r testpypi -u ${{ secrets.PYPI_TEST_USERNAME }} -p ${{ secrets.PYPI_TEST_PASSWORD }}
     
     - stage: Deploy
+      if: branch = master
       script:
-        - python setup.py sdist bdist_wheel -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
-      deploy:
-        provider: pypi
-        username: ${{ secrets.PYPI_USERNAME }}
-        password: ${{ secrets.PYPI_PASSWORD }}
-        cleanup: true
-        skip_existing: true
-        on:
-          branch: master
-          tags: false
+        - python setup.py sdist bdist_wheel
+        - twine upload dist/* -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
         
     - stage: Clean
       script:

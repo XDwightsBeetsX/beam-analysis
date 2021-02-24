@@ -20,22 +20,22 @@ KEYWORDS = ['beam', 'analysis', 'engineering']
 SHORT_DESCR = "Perform engineering analysis on a beam"
 
 # The text of the README file
-README_FILE = f"{str(HERE)}\\README.md".replace("\\", "/")
-print(f"[LOG] - Searching for readme in '{README_FILE}'...")
+README_FILE = str(HERE) + "/readme.md"
+print(f"[LOG] - Searching for readme: '{README_FILE}'")
 with open(README_FILE, "r", encoding="utf-8") as readme:
     LONG_DESCR = readme.read()
-    print(f"[LOG] - Found readme.")
+    print(f"[LOG] - Found readme")
 
 # The text of the REQUIREMENTS file
 REQUIREMENTS = []
-REQUIREMENTS_FILE = f"{str(HERE)}\\REQUIREMENTS.txt".replace("\\", "/")
-print(f"[LOG] - Searching for requirements in '{REQUIREMENTS_FILE}'...")
+REQUIREMENTS_FILE = str(HERE) + "/requirements.txt"
+print(f"[LOG] - Searching for requirements: '{REQUIREMENTS_FILE}'")
 with open(REQUIREMENTS_FILE, "r", encoding="utf-8") as req:
     lines = req.readlines()
     for line in lines:
         if line[0] != "#" and line.strip() != "":
             REQUIREMENTS.append(line.strip())
-    print(f"[LOG] - Found requirements.")
+    print(f"[LOG] - Found requirements")
 
 
 # SETUP
