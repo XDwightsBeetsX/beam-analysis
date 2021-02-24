@@ -1,4 +1,3 @@
-#!/bin/bash
 # Runs tests and deploys to PyPi
 # Only occurs on a tagged push to master 
 
@@ -6,16 +5,11 @@ language: python
 
 python: "3.8"
 
-os: linux
-
-dist: xenial
-
 install: pip install -r requirements.txt
 
 script: pytest
 
 deploy:
-  name: "Deploy to PyPi"
   provider: pypi
   username: ${{ secrets.PYPI_USERNAME }}
   password: ${{ secrets.PYPI_PASSWORD }}
