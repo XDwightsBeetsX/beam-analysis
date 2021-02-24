@@ -1,5 +1,6 @@
-# Upon a push to master, runs tests and deploys to PyPi
-# INPUT API KEY TO PASSWORD TO DEPLOY
+# Runs tests and deploys to PyPi
+# Only occurs on a tagged push to master
+
 language: python
 
 python:
@@ -11,12 +12,14 @@ install:
 script:
   pytest
 
-deploy:
-  provider: pypi
-  username: "__token__"
-  password: # FILL ME IN TO DEPLOY
-  skip_cleanup: true
-  skip_existing: true
-  on:
-    tags: true  # May want to disable to ease deployment
-    branch: master
+jobs:
+  deploy:
+    - name: Deploy to PyPi
+    provider: pypi
+    username: ${{ secrets.PYPI_USERNAME }}
+    password: ${{ secrets.PYPI_PASSWORD }}
+    skip_cleanup: true
+    skip_existing: true
+    on:
+      tags: true  # May want to disable to ease deployment
+      branch: master
