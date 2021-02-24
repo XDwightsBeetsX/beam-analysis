@@ -12,11 +12,12 @@ script: pytest
 stages:
   - Orient
   - Test
-  - name: Deploy
+  - Deploy-Test
+  - Deploy
     if: branch = master
-  - name: Clean
+  - Clean
     if: branch = master
-  - name: Verify Clean
+  - Verify Clean
 
 jobs:
   include:
@@ -24,11 +25,18 @@ jobs:
       script:
         - pwd
         - tree
-    - stage: Unit tests
+    
+    - stage: Test
       script: pytest
     
-    - stage: Deploy to PyPi
-      script: python setup.py sdist
+    - stage: Deploy-Test
+      script:
+        - python setup.py sdist bdist_wheel
+        - twine upload -r testpypi dist/*
+    
+    - stage: Deploy
+      script:
+        - python setup.py sdist bdist_wheel -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
       deploy:
         provider: pypi
         username: ${{ secrets.PYPI_USERNAME }}
@@ -43,7 +51,7 @@ jobs:
       script:
         rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
     
-        - stage: Verify Clean
+    - stage: Verify Clean
       script:
         - pwd
         - tree
