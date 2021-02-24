@@ -15,8 +15,8 @@ install:
 script: pytest
 
 jobs:
+  - name: Deploy to PyPi
   deploy:
-    - name: Deploy to PyPi
     provider: pypi
     username: ${{ secrets.PYPI_USERNAME }}
     password: ${{ secrets.PYPI_PASSWORD }}
@@ -25,6 +25,6 @@ jobs:
     on:
       tags: false
       branch: master
-    - name: Clean
-      run: |
-        rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
+  - name: Clean
+    run: |
+      rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
