@@ -4,8 +4,8 @@ from setuptools import setup, find_packages
 # PACKAGE NAME
 PKGNAME = "beam-analysis"
 
-# VERSION
-V = "1.0.0"
+# VERSION - CHANGE BEFORE RUNNING, PYPI WILL NOT UPLOAD
+V = "1.0.2"
 
 # AUTHOR
 AUTH = "John Gutierrez"
