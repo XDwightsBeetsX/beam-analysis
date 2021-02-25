@@ -1,4 +1,4 @@
-# beam-analysis  :construction_worker:  
+# beam_analysis  :construction_worker:  
 
 [![Build Status](https://travis-ci.com/XDwightsBeetsX/beam-analysis.svg?token=ojR96vWaxNB8o4NF9oGN&branch=master)](https://travis-ci.com/XDwightsBeetsX/beam-analysis)
  [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
@@ -10,7 +10,7 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 ## Usage
 
 ```shell
-pip install beam-analysis
+pip install beam_analysis
 ```
 
 ```shell
