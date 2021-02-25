@@ -12,34 +12,48 @@ os: linux
 dist: xenial
 
 jobs:
-  include:
-    - name: Orient
-      script:
-        - dir
-    
-    - name: Requirements
-      script:
-        - pip install -r requirements.txt
-    
-    - name: Test
-      script:
-        - pytest
-    
-    - name: Build
-      script:
-        - python setup.py sdist bdist_wheel
-    
-    - name: Deploy to testpypi
-      script:
-        - twine upload dist/* -r testpypi -u ${PYPI_TEST_USERNAME} -p ${PYPI_TEST_PASSWORD}
-    
-    - name: Deploy to pypi
+  include:    
+    - name: Test & Deploy
       if: branch = master
       script:
+        - echo "============================================"
+        - echo "========= Orient ==========================="
+        - echo "============================================"
+        - dir
+        - echo "============================================"
+        - echo "========= Install Requirements ============="
+        - echo "============================================"
+        - pip install -r requirements.txt
+        - 
+        - echo "============================================"
+        - echo "========= Test ============================="
+        - echo "============================================"
+        - pytest
+        - 
+        - echo "============================================"
+        - echo "========= Bundle Distribution =============="
+        - echo "============================================"
+        - python setup.py sdist bdist_wheel
+        -
+        - echo "============================================"
+        - echo "========= Bundle Distribution =============="
+        - echo "============================================"
+        - python setup.py sdist bdist_wheel
+        -
+        - echo "============================================"
+        - echo "========= Deploy to testpypi ==============="
+        - echo "============================================"
+        - twine upload dist/* -r testpypi -u ${PYPI_TEST_USERNAME} -p ${PYPI_TEST_PASSWORD}
+        - 
+        - echo "============================================"
+        - echo "========= Deploy to pypi ==================="
+        - echo "============================================"
         - twine upload dist/* -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD}
-    
-    - name: Clean
-      script:
+        - 
+        - echo "============================================"
+        - echo "========= Clean Files ======================"
+        - echo "============================================"
         - dir
         - rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
         - dir
+       
