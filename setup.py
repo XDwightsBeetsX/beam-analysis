@@ -5,7 +5,11 @@ from setuptools import setup, find_packages
 PKGNAME = "beam-analysis"
 
 # VERSION - CHANGE BEFORE RUNNING, PYPI WILL NOT UPLOAD
-V = "1.0.4"
+release = 1
+feature = 0
+update = 5
+V = f"{release}.{feature}.{update}"
+print(f"[LOG] - Executing into version {V}")
 
 # AUTHOR
 AUTH = "John Gutierrez"
