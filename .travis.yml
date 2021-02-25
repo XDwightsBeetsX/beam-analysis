@@ -34,14 +34,13 @@ jobs:
         password: ${{ secrets.PYPI_PASSWORD }}
         cleanup: true
         skip_existing: true
-        on:
-          branch: master
-          # tags: true
+        # on:
+        #   tags: true
 
     - name: Clean
       script:
+        echo "BUILD FILES"
+        dir
         rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
-    
-    - name: Verify Clean
-      script:
-        - dir
+        echo "CLEANED"
+        dir
