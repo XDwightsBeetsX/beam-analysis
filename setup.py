@@ -7,7 +7,7 @@ PKGNAME = "beam_analysis"
 # VERSION - CHANGE BEFORE RUNNING, PYPI WILL NOT UPLOAD
 release = 2
 feature = 0
-update = 0
+update = 1
 V = f"{release}.{feature}.{update}"
 print(f"[LOG] - Executing into version {V}")
 
