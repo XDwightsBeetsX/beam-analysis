@@ -26,21 +26,31 @@ jobs:
       script:
         - python setup.py sdist bdist_wheel
     
-    - name: Deploy
-      if: branch = master
+    - name: Deploy TEST
+      env:
+        PYPI_TEST_USERNAME: ${{ secrets.PYPI_TEST_USERNAME }}
+        PYPI_TEST_PASSWORD: ${{ secrets.PYPI_TEST_PASSWORD }}
+      script:
+        - twine upload dist/* -u "$PYPI_TEST_USERNAME" -p "$PYPI_TEST_PASSWORD"
       deploy:
         provider: pypi
         username: ${{ secrets.PYPI_USERNAME }}
         password: ${{ secrets.PYPI_PASSWORD }}
-        cleanup: true
-        skip_existing: true
-        # on:
-        #   tags: true
-
+    
+    - name: Deploy
+      if: branch = master
+      env:
+        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      script:
+        - twine upload dist/* -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD"
+      deploy:
+        provider: pypi
+        username: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_PASSWORD }}
+      
     - name: Clean
       script:
-        - echo BUILD FILES
         - dir
         - rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
-        - echo CLEANED
         - dir
