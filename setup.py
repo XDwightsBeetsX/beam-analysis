@@ -33,7 +33,7 @@ with open(README_PATH, "r", encoding="utf-8") as readme:
 
 # Get contents of REQUIREMENTS file
 REQUIREMENTS = []
-REQUIREMENTS_FILENAME = "REQUIREMENTS.txt"
+REQUIREMENTS_FILENAME = "requirements.txt"
 REQUIREMENTS_PATH = os.path.join(CURR_DIR, REQUIREMENTS_FILENAME)
 
 print(f"[LOG] - Searching for '{REQUIREMENTS_FILENAME}' in '{CURR_DIR}'")

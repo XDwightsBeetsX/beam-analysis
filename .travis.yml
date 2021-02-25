@@ -39,8 +39,8 @@ jobs:
 
     - name: Clean
       script:
-        echo "BUILD FILES"
-        dir
-        rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
-        echo "CLEANED"
-        dir
+        - echo BUILD FILES
+        - dir
+        - rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
+        - echo CLEANED
+        - dir
