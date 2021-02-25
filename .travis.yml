@@ -31,16 +31,16 @@ jobs:
     
     - name: Deploy to testpypi
       script:
-        - pwsh - $PYPI_TEST_USERNAME = ${{ secrets.PYPI_TEST_USERNAME }}
-        - $PYPI_TEST_PASSWORD = ${{ secrets.PYPI_TEST_PASSWORD }}
-        - twine upload dist/* -r testpypi -u ${PYPI_TEST_USERNAME} -p ${PYPI_TEST_PASSWORD}
+        - $TEST_USERNAME = $PYPI_TEST_USERNAME
+        - $TEST_PASSWORD = $PYPI_TEST_PASSWORD
+        - twine upload dist/* -r testpypi -u ${TEST_USERNAME} -p ${TEST_PASSWORD}
     
     - name: Deploy to pypi
       if: branch = master
       script:
-        - $PYPI_USERNAME = ${{ secrets.PYPI_USERNAME }}
-        - $PYPI_PASSWORD = ${{ secrets.PYPI_PASSWORD }}
-        - twine upload dist/* -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD}
+        - $USERNAME = $PYPI_USERNAME
+        - $PASSWORD = $PYPI_PASSWORD
+        - twine upload dist/* -u ${USERNAME} -p ${PASSWORD}
     
     - name: Clean
       script:
