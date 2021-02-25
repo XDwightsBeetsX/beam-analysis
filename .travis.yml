@@ -1,12 +1,9 @@
 # Runs tests and deploys to PyPi
-# Only occurs on a tagged push to master 
 
 language: python
 
 python: "3.8"
 
-# USE LINUX OR WINDOWS PS??
-#   HOW TO GET ENV VARIABLES FROM GIT -> SHELL ???
 os: linux
 
 dist: xenial
@@ -16,43 +13,19 @@ jobs:
     - name: Test & Deploy
       if: branch = master
       script:
-        - echo "============================================"
-        - echo "========= Orient ==========================="
-        - echo "============================================"
+        # Orient
         - dir
-        - echo "============================================"
-        - echo "========= Install Requirements ============="
-        - echo "============================================"
+        # Install Requirements
         - pip install -r requirements.txt
-        - 
-        - echo "============================================"
-        - echo "========= Test ============================="
-        - echo "============================================"
+        # Test"
         - pytest
-        - 
-        - echo "============================================"
-        - echo "========= Bundle Distribution =============="
-        - echo "============================================"
+        # Bundle Distribution
         - python setup.py sdist bdist_wheel
-        -
-        - echo "============================================"
-        - echo "========= Bundle Distribution =============="
-        - echo "============================================"
-        - python setup.py sdist bdist_wheel
-        -
-        - echo "============================================"
-        - echo "========= Deploy to testpypi ==============="
-        - echo "============================================"
+        # Deploy to testpypi
         - twine upload dist/* -r testpypi -u ${PYPI_TEST_USERNAME} -p ${PYPI_TEST_PASSWORD}
-        - 
-        - echo "============================================"
-        - echo "========= Deploy to pypi ==================="
-        - echo "============================================"
+        # Deploy to pypi
         - twine upload dist/* -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD}
-        - 
-        - echo "============================================"
-        - echo "========= Clean Files ======================"
-        - echo "============================================"
+        # Clean Files
         - dir
         - rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
         - dir
