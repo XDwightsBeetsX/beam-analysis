@@ -15,19 +15,18 @@ script: pytest
 
 jobs:
   include:
-    - stage: Orient
+    - name: Orient
       script:
         - dir
     
-    - stage: Test
+    - name: Test
       script: pytest
     
-    - stage: Deploy
-      name: "Deploy to PyPi Test"
+    - name: Build
       script:
         - python setup.py sdist bdist_wheel
-        # - twine upload dist/* -r testpypi -u ${{ secrets.PYPI_TEST_USERNAME }} -p ${{ secrets.PYPI_TEST_PASSWORD }}
-      name: Deploy to PyPi
+    
+    - name: Deploy
       if: branch = master
       deploy:
         provider: pypi
@@ -39,11 +38,10 @@ jobs:
           branch: master
           # tags: true
 
-    - stage: Clean
-      name: Run Clean
+    - name: Clean
       script:
         rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
-      name: Verify Clean
+    
+    - name: Verify Clean
       script:
-        - pwd
-        - tree
+        - dir
