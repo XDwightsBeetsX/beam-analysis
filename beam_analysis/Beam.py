@@ -1,9 +1,12 @@
 """
-Deflection plotter for beams
+Primary file for beam_analysis
 """
 
 import numpy as np
 from matplotlib import pyplot as plt
+
+from .utils import *
+from .Singularity import Singularity
 
 
 class Beam(object):
@@ -17,23 +20,56 @@ class Beam(object):
         self.E = e
         self.I = i
         self.L = l
-        self.ForcesAndMoments = {}
+        self.Singularity = Singularity(l)
+        
+    def addDistributedLoad(self, start, stop, mag, units="N/m"):
+        """
+        Beams do not enable gravity by default  
+        Conversion from 'lb/ft' or 'lbf/ft' to 'N/m'
+        """
+        magNpM = mag
+        if units != "N/m":
+            if units == "lb/ft" or units == "lbf/ft":
+                magNpM *= CONVERSION_D_TO_SI
+            else:
+                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
+        if stop < start:
+            raise Exception(f"{ERROR_PREFIX_BEAM} invalid start/stop: '{start}/{stop}'")
+        
+        self.Singularity.addComponent(start, mag, -1)
+        # Add counteracting distributed load if terminates before beam length
+        if stop < self.L:
+            self.Singularity.addComponent(stop, -mag, -1)
+    
+    def addPointLoad(self, loc, mag, units="N"):
+        """
+        Upward+  
+        Conversion from 'lb' or 'lbf' to 'N'
+        """
+        magN = mag
+        if units != "N":
+            if units == "lb" or units == "lbf":
+                magN *= CONVERSION_F_TO_SI
+            else:
+                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
+        self.Singularity.addComponent(loc, mag, 0)
 
-    def addPointLoad(self, loc, mag):
-        """Upward+"""
-        self.ForcesAndMoments[f"F,{loc}"] = mag
-
-    def addDistributedLoad(self, start, stop, mag):
-        """Beams do not enable gravity by default"""
-        self.ForcesAndMoments[f"D,{start},{stop}"] = mag
-
-    def addAppliedMoment(self, loc, mag):
-        """CC+"""
-        self.ForcesAndMoments[f"M,{loc}"] = mag
+    def addAppliedMoment(self, loc, mag, units="N-m"):
+        """
+        CC+  
+        Conversion from 'lb-ft' or 'lbf-ft' to 'N-m'
+        """
+        magNM = mag
+        if units != "N-m":
+            if units == "lb-ft" or units == "lbf-ft":
+                magNM *= CONVERSION_M_TO_SI
+            else:
+                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
+        self.Singularity.addComponent(loc, mag, -1)
     
     def getShear(self, x):
         """
-        Returns the moment in the beam at a point x.
+        Returns the shear in the beam at a point x.
         
         Forces:             v  
         Distributed Loads:  v * x  
@@ -60,7 +96,7 @@ class Beam(object):
             elif ty == 'M':
                 continue
             else:
-                raise Exception(f"Invalid Force/Moment key: '{k}'")
+                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
 
         return s
     
@@ -96,7 +132,7 @@ class Beam(object):
                     # apply load
                     m += v
             else:
-                raise Exception(f"Invalid Force/Moment key: '{k}'")
+                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
 
         return m
     
@@ -133,8 +169,7 @@ class Beam(object):
                     eff = x - start
                     ang += v * eff
             else:
-                raise Exception(f"Invalid Force/Moment key: '{k}'")
-
+                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
         return (1/(self.E * self.I)) * ang
     
     def getDeflection(self, x):
@@ -170,8 +205,7 @@ class Beam(object):
                     eff = x - start
                     d += (1/6) * v * eff**2
             else:
-                raise Exception(f"Invalid Force/Moment key: '{k}'")
-
+                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
         return (1/(self.E * self.I)) * d
     
     def showForcesAndMoments(self):
