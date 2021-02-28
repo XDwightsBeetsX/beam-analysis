@@ -36,10 +36,10 @@ class Beam(object):
         if stop < start:
             raise Exception(f"{ERROR_PREFIX_BEAM} invalid start/stop: '{start}/{stop}'")
         
-        self.Singularity.addComponent(start, mag, -1)
+        self.Singularity.addTerm(start, mag, -1)
         # Add counteracting distributed load if terminates before beam length
         if stop < self.L:
-            self.Singularity.addComponent(stop, -mag, -1)
+            self.Singularity.addTerm(stop, -mag, -1)
     
     def addPointLoad(self, loc, mag, units="N"):
         """
@@ -52,7 +52,7 @@ class Beam(object):
                 magN *= CONVERSION_F_TO_SI
             else:
                 raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
-        self.Singularity.addComponent(loc, mag, 0)
+        self.Singularity.addTerm(loc, mag, 0)
 
     def addAppliedMoment(self, loc, mag, units="N-m"):
         """
@@ -65,148 +65,43 @@ class Beam(object):
                 magNM *= CONVERSION_M_TO_SI
             else:
                 raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
-        self.Singularity.addComponent(loc, mag, -1)
+        self.Singularity.addTerm(loc, mag, -1)
     
-    def getShear(self, x):
+    def getAnalysis(self, n=10**3, include=["F", "M", "A", "D"]):
         """
-        Returns the shear in the beam at a point x.
+        include=["F", "M", "A", "D"]  
+            F - Forces  
+            M - Moments  
+            A - Angle  
+            D - Deflection  
+        """
+        for analysis in include:
+            if analysis not in ["F", "M", "A", "D"]:
+                raise Exception(f"{ERROR_PREFIX_BEAM} invalid analysis request: '{analysis}'")
+            if analysis == "F":
+                shear = np.zeros(n)
+            elif analysis == "M":
+                moment = np.zeros(n)
+            elif analysis == "A":
+                angle = np.zeros(n)
+            elif analysis == "D":
+                deflection = np.zeros(n)
+
+        for i in range(n):
+            for analysis in include:
+                if analysis == "F":
+                    shear[i] = self.Singularity.evaluate(i, 0)
+                if analysis == "M":
+                    moment[i] = self.Singularity.evaluate(i, 1)
+                if analysis == "A":
+                    angle[i] = self.Singularity.evaluate(i, 2)
+                if analysis == "D":
+                    deflection[i] = self.Singularity.evaluate(i, 3)
         
-        Forces:             v  
-        Distributed Loads:  v * x  
-        Moments:            0  
-        """
-        s = 0
-        for k, v in self.ForcesAndMoments.items():
-            # pull type, loc, and mags from any applied loads
-            app = k.split(',')
 
-            # type of load [F, D, M]
-            ty = app[0]
-            start = float(app[1])
-            if ty == 'F':
-                if start <= x:
-                    # apply load
-                    s += v
-            elif ty == 'D':
-                end = float(app[2])
-                if start <= x and x < end:
-                    # apply load
-                    eff = x - start
-                    s += v * eff
-            elif ty == 'M':
-                continue
-            else:
-                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
-
-        return s
-    
-    def getMoment(self, x):
-        """
-        Returns the moment in the beam at a point x.
+        analysis_results = (shear, moment, angle, deflection)
         
-        Forces:             v * x  
-        Distributed Loads:  (1/2) * v * x**2  
-        Moments:            v  
-        """
-        m = 0
-        for k, v in self.ForcesAndMoments.items():
-            # pull type, loc, and mags from any applied loads
-            app = k.split(',')
-
-            # type of load [F, D, M]
-            ty = app[0]
-            start = float(app[1])
-            if ty == 'F':
-                if start <= x:
-                    # apply load
-                    eff = x - start
-                    m += v * eff
-            elif ty == 'D':
-                end = float(app[2])
-                if start <= x and x < end:
-                    # apply load
-                    eff = x - start
-                    m += (1/2) * v * eff**2
-            elif ty == 'M':
-                if start <= x:
-                    # apply load
-                    m += v
-            else:
-                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
-
-        return m
-    
-    def getAngle(self, x):
-        """
-        Returns the angle in the beam at a point x.
-        
-        Forces:             (1/2) * v * x**2  
-        Distributed Loads:  (1/6) * v * x**3  
-        Moments:            v * x
-        """
-        ang = 0
-        for k, v in self.ForcesAndMoments.items():
-            # pull type, loc, and mags from any applied loads
-            app = k.split(',')
-
-            # type of load [F, D, M]
-            ty = app[0]
-            start = float(app[1])
-            if ty == 'F':
-                if start <= x:
-                    # apply load
-                    eff = x - start
-                    ang += (1/2) * v * eff**2
-            elif ty == 'D':
-                end = float(app[2])
-                if start <= x and x < end:
-                    # apply load
-                    eff = x - start
-                    ang += (1/6) * v * eff**3
-            elif ty == 'M':
-                if start <= x:
-                    # apply load
-                    eff = x - start
-                    ang += v * eff
-            else:
-                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
-        return (1/(self.E * self.I)) * ang
-    
-    def getDeflection(self, x):
-        """
-        Returns the deflection in the beam at a point x.
-        
-        Forces:             (1/6) * v * x**3  
-        Distributed Loads:  (1/24) * v * x**4  
-        Moments:            (1/6) * v * x**2
-        """
-        d = 0
-        for k, v in self.ForcesAndMoments.items():
-            # pull type, loc, and mags from any applied loads
-            app = k.split(',')
-
-            # type of load [F, D, M]
-            ty = app[0]
-            start = float(app[1])
-            if ty == 'F':
-                if start <= x:
-                    # apply load
-                    eff = x - start
-                    d += (1/6) * v * eff**3
-            elif ty == 'D':
-                end = float(app[2])
-                if start <= x and x < end:
-                    # apply load
-                    eff = x - start
-                    d += (1/24) * v * eff**4
-            elif ty == 'M':
-                if start <= x:
-                    # apply load
-                    eff = x - start
-                    d += (1/6) * v * eff**2
-            else:
-                raise Exception(f"{ERROR_PREFIX} invalid force/moment key: '{k}'")
-        return (1/(self.E * self.I)) * d
+        return analysis_results
     
     def showForcesAndMoments(self):
         for k, v in self.ForcesAndMoments.items():
@@ -217,22 +112,10 @@ class Beam(object):
         print(f"I = {self.I:.4f}m^4")
         print(f"L = {self.L:.4f}m")
         
-    def evaluate(self, n=1000):
+    def analyze(self, n=1000, analysis_includes=["F", "M", "A", "D"]):
         """Plots deflections and reports max deflection"""       
-        x = np.linspace(0, self.L, num=n)
 
-        # Data arrays
-        beam = np.zeros(n)
-        shear = np.zeros(n)
-        moment = np.zeros(n)
-        angle = np.zeros(n)
-        deflection = np.zeros(n)
-        
-        # [loc, mag]
-        max_shear = [0, 0]
-        max_moment = [0, 0]
-        max_angle = [0, 0]
-        max_deflection = [0, 0]
+        analysis = self.getAnalysis(include=analysis_includes)
 
         # Data collection
         for i in range(n):
