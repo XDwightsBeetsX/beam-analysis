@@ -20,21 +20,23 @@ if __name__ == "__main__":
     # = Make the beam and add loads = #
     # =============================== #
     B = Beam(L, E, I)
-    B.addPointLoad(0, 10)
-    B.addPointLoad(1, 10)
+    B.addPointLoad(0, 11)
+    B.addPointLoad(1, 11)
     B.addPointLoad(.5, -20)
+    B.addDistributedLoad(0, 1, -2)
 
     # =============================== #
-    # ========== Parameters ========= #
+    # = Make the beam and add loads = #
+    # =============================== #
+
+
+    # =============================== #
+    # ======== Display Info ========= #
     # =============================== #
     B.showParams()
+    # B.showForcesAndMoments()   
     
     # =============================== #
-    # ========= Added loads ========= #
-    # =============================== #
-    # B.showForcesAndMoments()
-    
-    # =============================== #
-    # ==== Run Forrest Run!! ======== #
+    # ======== Run Analysis ========= #
     # =============================== #
     B.analyze()

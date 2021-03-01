@@ -17,6 +17,7 @@ class Beam(object):
         self.E = e
         self.I = i
         self.Singularity = Singularity(l, e, i)
+        self.BoundaryConditions = []
     
     def showParams(self):
         print(f"E = {str(self.E)}Pa")
@@ -68,6 +69,10 @@ class Beam(object):
             self.Singularity.addTerm(stop, -mag, DISTRIBUTED_LOAD)
         self.Singularity.addTerm(start, mag, DISTRIBUTED_LOAD)
     
+    def addBoundaryCondition(self, loc, bc_type=DEFLECTION, bc_value=0.0):
+        bc = BoundaryCondition(loc, bc_type, bc_value)
+        self.BoundaryConditions.append(bc)
+
     def getAnalysis(self, n=10**3):
         """
         Returns tuple of analysis, all with len=n:  
@@ -97,6 +102,9 @@ class Beam(object):
         
     def analyze(self):
         """Plots deflections and reports max values from analysis"""       
+
+        if len(self.BoundaryConditions) < 2:
+            raise Exception(f"{ERROR_PREFIX_BEAM} cannot run analysis without 2 boundary conditions")
 
         analysis = self.getAnalysis()
         x = analysis[0]
@@ -155,6 +163,7 @@ class Beam(object):
         print(f"\nREPORT:")
         print(f"Singularity Function:")
         print(f"{self.Singularity.getString()}")
+        print()
         print(f"Max shear:      {max_shear.getString()}")
         print(f"Max moment:     {max_moment.getString()}")
         print(f"Max angle:      {max_angle.getString()}")
@@ -179,3 +188,15 @@ class PointValuePair(object):
         '[value][units] @ [point]m'
         """
         return f"{self.Value:.4f}{self.Units} @ {self.Point:.4f}m"
+
+class BoundaryCondition(object):
+    """
+    Stores a Boundary Condition
+    location  
+    bc_type  
+    bc_value
+    """
+    def __init(self, loc, bc_type=DEFLECTION, bc_value=0.0):
+        self.Location = loc
+        self.Bc_type = bc_type
+        self.Bc_value = bc_value

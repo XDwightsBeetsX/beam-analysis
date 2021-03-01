@@ -22,9 +22,12 @@ class Singularity(object):
     
     def getString(self):
         s = ""
-        for term in self.Terms:
+        for i in range(len(self.Terms)):
+            term = self.Terms[i]
             ts = term.getString()
-            if term.Coefficient >= 0:
+            if i == 0:
+                s += ts
+            elif term.Coefficient >= 0:
                 s += " + " + ts
             else:
                 ts = ts[1:]
