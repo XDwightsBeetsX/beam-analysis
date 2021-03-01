@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # =============================== #
     # = Make the beam and add loads = #
     # =============================== #
-    B = Beam(E, I, L)
+    B = Beam(L, E, I)
     B.addPointLoad(0, 10)
     B.addPointLoad(1, 10)
     B.addPointLoad(.5, -20)
@@ -37,4 +37,4 @@ if __name__ == "__main__":
     # =============================== #
     # ==== Run Forrest Run!! ======== #
     # =============================== #
-    B.evaluate()
+    B.analyze()

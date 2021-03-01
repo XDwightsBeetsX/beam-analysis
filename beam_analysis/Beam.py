@@ -5,23 +5,50 @@ Primary file for beam_analysis
 import numpy as np
 from matplotlib import pyplot as plt
 
-from .utils import *
 from .Singularity import Singularity
-
+from .utils import *
 
 class Beam(object):
     """
-    ForcesAndMoments Dict Key Codes:  
-    PointLoad:          ['F,loc'] = mag  
-    DistributedLoad:    ['D,start,stop'] = mag  
-    AppliedMoment:      ['M,loc'] = mag
+    Has material properties E, I, L as well as a Singularity function for the beam
     """
-    def __init__(self, e, i, l):
+    def __init__(self, l, e, i):
+        self.L = l
         self.E = e
         self.I = i
-        self.L = l
-        self.Singularity = Singularity(l)
-        
+        self.Singularity = Singularity(l, e, i)
+    
+    def showParams(self):
+        print(f"E = {str(self.E)}Pa")
+        print(f"I = {str(self.I)}m^4")
+        print(f"L = {str(self.L)}m")
+    
+    def addAppliedMoment(self, loc, mag, units="N-m"):
+        """
+        CC+  
+        Conversion from 'lb-ft' or 'lbf-ft' to 'N-m'
+        """
+        magNM = mag
+        if units != "N-m":
+            if units == "lb-ft" or units == "lbf-ft":
+                magNM *= CONVERSION_M_TO_SI
+            else:
+                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
+        self.Singularity.addTerm(loc, mag, MOMENT)
+    
+    def addPointLoad(self, loc, mag, units="N"):
+        """
+        Upward+  
+        Conversion from 'lb' or 'lbf' to 'N'
+        """
+        magN = mag
+        if units != "N":
+            if units == "lb" or units == "lbf":
+                magN *= CONVERSION_F_TO_SI
+            else:
+                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
+        self.Singularity.addTerm(loc, mag, POINT_LOAD)
+    
     def addDistributedLoad(self, start, stop, mag, units="N/m"):
         """
         Beams do not enable gravity by default  
@@ -36,113 +63,67 @@ class Beam(object):
         if stop < start:
             raise Exception(f"{ERROR_PREFIX_BEAM} invalid start/stop: '{start}/{stop}'")
         
-        self.Singularity.addTerm(start, mag, -1)
         # Add counteracting distributed load if terminates before beam length
         if stop < self.L:
-            self.Singularity.addTerm(stop, -mag, -1)
+            self.Singularity.addTerm(stop, -mag, DISTRIBUTED_LOAD)
+        self.Singularity.addTerm(start, mag, DISTRIBUTED_LOAD)
     
-    def addPointLoad(self, loc, mag, units="N"):
+    def getAnalysis(self, n=10**3):
         """
-        Upward+  
-        Conversion from 'lb' or 'lbf' to 'N'
+        Returns tuple of analysis, all with len=n:  
+            x       [0, L]  
+            beam    0s  
+            shear  
+            moment  
+            angle  
+            deflection
         """
-        magN = mag
-        if units != "N":
-            if units == "lb" or units == "lbf":
-                magN *= CONVERSION_F_TO_SI
-            else:
-                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
-        self.Singularity.addTerm(loc, mag, 0)
+        x = np.linspace(0, self.L, num=n)
+        beam = np.zeros(n)
+        shear = np.zeros(n)
+        moment = np.zeros(n)
+        angle = np.zeros(n)
+        deflection = np.zeros(n)
 
-    def addAppliedMoment(self, loc, mag, units="N-m"):
-        """
-        CC+  
-        Conversion from 'lb-ft' or 'lbf-ft' to 'N-m'
-        """
-        magNM = mag
-        if units != "N-m":
-            if units == "lb-ft" or units == "lbf-ft":
-                magNM *= CONVERSION_M_TO_SI
-            else:
-                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
-        self.Singularity.addTerm(loc, mag, -1)
-    
-    def getAnalysis(self, n=10**3, include=["F", "M", "A", "D"]):
-        """
-        include=["F", "M", "A", "D"]  
-            F - Forces  
-            M - Moments  
-            A - Angle  
-            D - Deflection  
-        """
-        for analysis in include:
-            if analysis not in ["F", "M", "A", "D"]:
-                raise Exception(f"{ERROR_PREFIX_BEAM} invalid analysis request: '{analysis}'")
-            if analysis == "F":
-                shear = np.zeros(n)
-            elif analysis == "M":
-                moment = np.zeros(n)
-            elif analysis == "A":
-                angle = np.zeros(n)
-            elif analysis == "D":
-                deflection = np.zeros(n)
-
-        for i in range(n):
-            for analysis in include:
-                if analysis == "F":
-                    shear[i] = self.Singularity.evaluate(i, 0)
-                if analysis == "M":
-                    moment[i] = self.Singularity.evaluate(i, 1)
-                if analysis == "A":
-                    angle[i] = self.Singularity.evaluate(i, 2)
-                if analysis == "D":
-                    deflection[i] = self.Singularity.evaluate(i, 3)
-        
-
-        analysis_results = (shear, moment, angle, deflection)
-        
-        return analysis_results
-    
-    def showForcesAndMoments(self):
-        for k, v in self.ForcesAndMoments.items():
-            print(f"{k}: {v}")
-
-    def showParams(self):
-        print(f"E = {self.E:.4f}Pa")
-        print(f"I = {self.I:.4f}m^4")
-        print(f"L = {self.L:.4f}m")
-        
-    def analyze(self, n=1000, analysis_includes=["F", "M", "A", "D"]):
-        """Plots deflections and reports max deflection"""       
-
-        analysis = self.getAnalysis(include=analysis_includes)
-
-        # Data collection
-        for i in range(n):
+        for i in range(len(x)):
             pt = x[i]
-            s = self.getShear(pt)
-            m = self.getMoment(pt)
-            a = self.getAngle(pt)
-            d = self.getDeflection(pt)
+            shear[i] = self.Singularity.evaluate(pt, "shear")
+            moment[i] = self.Singularity.evaluate(pt, "moment")
+            angle[i] = self.Singularity.evaluate(pt, "angle")
+            deflection[i] = self.Singularity.evaluate(pt, "deflection")
 
-            shear[i] = s
-            moment[i] = m
-            angle[i] = a
-            deflection[i] = d
-            
-            if abs(s) > abs(max_shear[1]):
-                max_shear[0] = pt
-                max_shear[1] = s
-            if abs(m) > abs(max_moment[1]):
-                max_moment[0] = pt
-                max_moment[1] = m
-            if abs(a) > abs(max_angle[1]):
-                max_angle[0] = pt
-                max_angle[1] = a
-            if abs(d) > abs(max_deflection[1]):
-                max_deflection[0] = pt
-                max_deflection[1] = d
-            
+        analysis_results = (x, beam, shear, moment, angle, deflection)
+        return analysis_results
+        
+    def analyze(self):
+        """Plots deflections and reports max values from analysis"""       
+
+        analysis = self.getAnalysis()
+        x = analysis[0]
+        beam = analysis[1]
+        shear = analysis[2]
+        moment = analysis[3]
+        angle = analysis[4]
+        deflection = analysis[5]
+
+        # Get maximum values
+        max_shear = PointValuePair(0, 0.0, '[N]')
+        max_moment = PointValuePair(0, 0.0, '[N-m]')
+        max_angle = PointValuePair(0, 0.0, '[rad]')
+        max_deflection = PointValuePair(0, 0.0, '[m]')
+        for i in range(len(x)):
+            if abs(shear[i]) > abs(max_shear.Value):
+                max_shear.Value = shear[i]
+                max_shear.Point = x[i]
+            if abs(moment[i]) > abs(max_moment.Value):
+                max_moment.Value = moment[i]
+                max_moment.Point = x[i]
+            if abs(angle[i]) > abs(max_angle.Value):
+                max_angle.Value = angle[i]
+                max_angle.Point = x[i]
+            if abs(deflection[i]) > abs(max_deflection.Value):
+                max_deflection.Value = deflection[i]
+                max_deflection.Point = x[i]
         
         # Plotting
         fig, ax = plt.subplots(2, 2, sharex="all")
@@ -172,9 +153,29 @@ class Beam(object):
 
         # Report
         print(f"\nREPORT:")
-        print(f"Max shear:      {max_shear[1]:.4f} [N] @ {max_shear[0]:.4f}m")
-        print(f"Max moment:     {max_moment[1]:.4f} [N-m] @ {max_moment[0]:.4f}m")
-        print(f"Max angle:      {max_angle[1]:.4f} [rad] @ {max_angle[0]:.4f}m")
-        print(f"Max deflection: {max_deflection[1]:.4f} [m] @ {max_deflection[0]:.4f}m\n")
+        print(f"Singularity Function:")
+        print(f"{self.Singularity.getString()}")
+        print(f"Max shear:      {max_shear.getString()}")
+        print(f"Max moment:     {max_moment.getString()}")
+        print(f"Max angle:      {max_angle.getString()}")
+        print(f"Max deflection: {max_deflection.getString()}")
+        print()
 
         plt.show()
+
+
+class PointValuePair(object):
+    """
+    Stores a point and value.  
+    Offers a show() method
+    """
+    def __init__(self, point, value, units):
+        self.Point = point
+        self.Value = value
+        self.Units = units
+    
+    def getString(self):
+        """
+        '[value][units] @ [point]m'
+        """
+        return f"{self.Value:.4f}{self.Units} @ {self.Point:.4f}m"

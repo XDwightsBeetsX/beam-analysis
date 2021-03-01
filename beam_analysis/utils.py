@@ -6,6 +6,18 @@ Contains useful information and constants for the project
 
 
 # ================================ #
+# ====== CONST STRINGS =========== #
+# ================================ #
+SHEAR = "shear"
+MOMENT = "moment"
+ANGLE = "angle"
+DEFLECTION = "deflection"
+
+POINT_LOAD = "point_load"
+DISTRIBUTED_LOAD = "distributed_load"
+
+
+# ================================ #
 # ========= PREFIXES ============= #
 # ================================ #
 ERROR_PREFIX = "[BEAM_ANALYSIS] -"
