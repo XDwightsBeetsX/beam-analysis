@@ -70,6 +70,11 @@ class Beam(object):
         self.Singularity.addTerm(start, mag, DISTRIBUTED_LOAD)
     
     def addBoundaryCondition(self, loc, bc_type=DEFLECTION, bc_value=0.0):
+        """
+        Beams require 2x BCs to analyze  
+        bc_type can be "angle" or "deflection"  
+        bc_value is typically 0.0
+        """
         bc = BoundaryCondition(loc, bc_type, bc_value)
         self.BoundaryConditions.append(bc)
 
@@ -103,8 +108,8 @@ class Beam(object):
     def analyze(self):
         """Plots deflections and reports max values from analysis"""       
 
-        if len(self.BoundaryConditions) < 2:
-            raise Exception(f"{ERROR_PREFIX_BEAM} cannot run analysis without 2 boundary conditions")
+        # if len(self.BoundaryConditions) < 2:
+        #     raise Exception(f"{ERROR_PREFIX_BEAM} cannot run analysis without 2 boundary conditions")
 
         analysis = self.getAnalysis()
         x = analysis[0]
