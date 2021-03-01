@@ -36,7 +36,8 @@ if __name__ == "__main__":
     # ======== Display Info ========= #
     # =============================== #
     B.showParams()
-    # print(B.Singularity.getString())    
+    B.showAppliedLoads()
+
     # =============================== #
     # ======== Run Analysis ========= #
     # =============================== #
