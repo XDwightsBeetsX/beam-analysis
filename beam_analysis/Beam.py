@@ -29,7 +29,7 @@ class Beam(object):
         print(f"I = {str(self.I)}m^4")
         print(f"L = {str(self.L)}m")
     
-    def showAppliedLoads(self):
+    def showAppliedLoadsEq(self):
         s = ""
         for i in range(len(self.AppliedLoads)):
             term = self.AppliedLoads[i]
@@ -107,7 +107,7 @@ class Beam(object):
             angle  
             deflection
         """
-        self.Singularity = Singularity(self.L, self.E, self.I, self.AppliedLoads)
+        self.Singularity = Singularity(self.L, self.E, self.I, self.AppliedLoads, self.BoundaryConditions)
 
         x_vals = np.linspace(0, self.L, num=n)
         beam = np.zeros(n)
@@ -132,8 +132,6 @@ class Beam(object):
         moment = analysis[3]
         angle = analysis[4]
         deflection = analysis[5]
-
-        print(shear)
 
         # Get maximum values
         max_shear = PointValuePair(0, 0.0, '[N]')

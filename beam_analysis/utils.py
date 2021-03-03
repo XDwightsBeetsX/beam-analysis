@@ -16,6 +16,8 @@ DEFLECTION = "deflection"
 POINT_LOAD = "point_load"
 DISTRIBUTED_LOAD = "distributed_load"
 
+ANGLE_BC = "angle_bc"
+
 
 # ================================ #
 # ========= PREFIXES ============= #

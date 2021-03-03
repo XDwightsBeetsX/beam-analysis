@@ -4,11 +4,12 @@ AppliedLoad class used in Beam and Singularity
 
 import numpy as np
 
-from .utils import MOMENT, POINT_LOAD, DISTRIBUTED_LOAD
+from .utils import MOMENT, POINT_LOAD, DISTRIBUTED_LOAD, ANGLE_BC
 
 
 class AppliedLoad(object):
     """
+    Effectively a Singularity Function term.  
     Stores information about an applied load:
     - Start  
     - Coefficient (Magnitude)  
@@ -19,7 +20,9 @@ class AppliedLoad(object):
         self.Start = start
         self.Coefficient = coefficient
         self.Origin = origin
-        if origin == MOMENT:
+        if origin == ANGLE_BC:
+            self.Power = -2
+        elif origin == MOMENT:
             self.Power = -1
         elif origin == POINT_LOAD:
             self.Power = 0

@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # ======== Display Info ========= #
     # =============================== #
     B.showParams()
-    B.showAppliedLoads()
+    B.showAppliedLoadsEq()
 
     # =============================== #
     # ======== Run Analysis ========= #
