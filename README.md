@@ -5,7 +5,8 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/XDwightsBeetsX/beam_analysis.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/XDwightsBeetsX/beam_analysis/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/XDwightsBeetsX/beam_analysis.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/XDwightsBeetsX/beam_analysis/alerts/)  
 [![PyPI version](https://badge.fury.io/py/beam-analysis.svg)](https://badge.fury.io/py/beam-analysis)
-[![PyPi downloads](https://pypip.in/d/beam-analysis/badge.png)](https://crate.io/packages/beam-analysis/)
+[![PyPi downloads](https://pypip.in/d/beam-analysis/badge.png)](https://crate.io/packages/beam-analysis/)  
+
 Perform engineering analysis on beams with diagrams for shear, moments, angle, and deflection  
 
 ## Usage
