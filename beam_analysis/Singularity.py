@@ -5,7 +5,7 @@ Used by Beam to make functions for shear/moment...
 import numpy as np
 
 from .AppliedLoad import AppliedLoad
-from .utils import *
+from .utils import PREFIX_SINGULARITY, SHEAR, MOMENT, ANGLE, DEFLECTION, ANGLE_BC
 
 
 class Singularity(object):

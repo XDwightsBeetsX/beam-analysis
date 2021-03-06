@@ -1,6 +1,6 @@
 
 
-from .utils import ANGLE, DEFLECTION
+from .utils import DEFLECTION
 
 
 class BoundaryCondition(object):
