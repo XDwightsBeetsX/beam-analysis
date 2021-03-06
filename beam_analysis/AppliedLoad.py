@@ -29,21 +29,28 @@ class AppliedLoad(object):
         elif origin == DISTRIBUTED_LOAD:
             self.Power = 1
     
-    def getString(self):
-        s = f"{self.Coefficient}<x-{self.Start}>^{self.Power}"
-        return s
+    def getString(self, powerModifier=0):
+        effPower = self.Power + powerModifier
+        if effPower < 0:
+            return "0"
+        elif effPower == 0:
+            return f"{self.Coefficient}"
+        elif effPower == 1:
+            return f"{self.Coefficient}<x-{self.Start}>"
+        else:
+            return f"({self.Coefficient}/{np.math.factorial(effPower)})<x-{self.Start}>^{effPower}"
     
     def evaluate(self, point, powerModifier):
+        effPower = self.Power + powerModifier
         if point < self.Start:
             return 0
-        elif (self.Power + powerModifier) < 0:
+        elif effPower < 0:
             return 0
-        elif (self.Power + powerModifier) == 0:
+        elif effPower == 0:
             return self.Coefficient
         elif self.Coefficient == 0:
             return 0
-        elif (self.Power + powerModifier) == 1:
+        elif effPower == 1:
             return self.Coefficient * (point - self.Start)
         else:
-            effPower = self.Power + powerModifier
             return (self.Coefficient / np.math.factorial(effPower)) * (point - self.Start)**(effPower)

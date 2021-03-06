@@ -20,28 +20,15 @@ class Beam(object):
         self.L = l
         self.E = e
         self.I = i
-        self.AppliedLoads = []
-        self.BoundaryConditions = []
-        self.Singularity = None
+        self.Singularity = Singularity(l, e, i)
     
     def showParams(self):
-        print(f"E = {str(self.E)}Pa")
-        print(f"I = {str(self.I)}m^4")
-        print(f"L = {str(self.L)}m")
+        print(f"E = {(self.E/10E6):.3e} [MPa]")
+        print(f"I = {self.I:.3e} [m^4]")
+        print(f"L = {self.L:.3f} [m]")
     
-    def showAppliedLoadsEq(self):
-        s = ""
-        for i in range(len(self.AppliedLoads)):
-            term = self.AppliedLoads[i]
-            ts = term.getString()
-            if i == 0:
-                s += ts
-            elif term.Coefficient >= 0:
-                s += " + " + ts
-            else:
-                ts = ts[1:]
-                s += " - " + ts
-        print(s)
+    def showSingularityString(self, analysis_type=SHEAR):
+        print(self.Singularity.getString())
     
     def addAppliedMoment(self, loc, mag, units="N-m"):
         """
@@ -53,8 +40,9 @@ class Beam(object):
             if units == "lb-ft" or units == "lbf-ft":
                 magNM *= CONVERSION_M_TO_SI
             else:
-                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
-        self.AppliedLoads.append(AppliedLoad(loc, mag, MOMENT))
+                raise Exception(f"{PREFIX_BEAM} invalid units: '{units}'")
+        newMomentLoad = AppliedLoad(loc, mag, MOMENT)
+        self.Singularity.Terms.append(newMomentLoad)
     
     def addPointLoad(self, loc, mag, units="N"):
         """
@@ -66,8 +54,9 @@ class Beam(object):
             if units == "lb" or units == "lbf":
                 magN *= CONVERSION_F_TO_SI
             else:
-                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
-        self.AppliedLoads.append(AppliedLoad(loc, mag, POINT_LOAD))
+                raise Exception(f"{PREFIX_BEAM} invalid units: '{units}'")
+        newPointLoad = AppliedLoad(loc, mag, POINT_LOAD)
+        self.Singularity.Terms.append(newPointLoad)
     
     def addDistributedLoad(self, start, stop, mag, units="N/m"):
         """
@@ -79,14 +68,17 @@ class Beam(object):
             if units == "lb/ft" or units == "lbf/ft":
                 magNpM *= CONVERSION_D_TO_SI
             else:
-                raise Exception(f"{ERROR_PREFIX_BEAM} invalid units: '{units}'")
+                raise Exception(f"{PREFIX_BEAM} invalid units: '{units}'")
         if stop < start:
-            raise Exception(f"{ERROR_PREFIX_BEAM} invalid start/stop: '{start}/{stop}'")
+            raise Exception(f"{PREFIX_BEAM} invalid start/stop: '{start}/{stop}'")
         
         # Add counteracting distributed load if terminates before beam length
         if stop < self.L:
-            self.AppliedLoads.append(AppliedLoad(stop, -mag, DISTRIBUTED_LOAD))
-        self.AppliedLoads.append(AppliedLoad(start, mag, DISTRIBUTED_LOAD))
+            counteractingDistLoad = AppliedLoad(stop, -mag, DISTRIBUTED_LOAD)
+            self.Singularity.Terms.append(counteractingDistLoad)
+        
+        distributedLoad = AppliedLoad(start, mag, DISTRIBUTED_LOAD)
+        self.Singularity.Terms.append(distributedLoad)
     
     def addBoundaryCondition(self, loc, bc_type=DEFLECTION, bc_value=0.0):
         """
@@ -95,7 +87,7 @@ class Beam(object):
         bc_value is typically 0.0
         """
         bc = BoundaryCondition(loc, bc_type, bc_value)
-        self.BoundaryConditions.append(bc)
+        self.Singularity.BoundaryConditions.append(bc)
 
     def getAnalysis(self, n=10**3):
         """
@@ -107,24 +99,23 @@ class Beam(object):
             angle  
             deflection
         """
-        self.Singularity = Singularity(self.L, self.E, self.I, self.AppliedLoads, self.BoundaryConditions)
-
         x_vals = np.linspace(0, self.L, num=n)
         beam = np.zeros(n)
-        shear = self.Singularity.evaluate(x_vals, SHEAR)
-        moment = self.Singularity.evaluate(x_vals, MOMENT)
-        angle = self.Singularity.evaluate(x_vals, ANGLE)
-        deflection = self.Singularity.evaluate(x_vals, DEFLECTION)
+        shear = self.Singularity.getAnalysis(x_vals, SHEAR)
+        moment = self.Singularity.getAnalysis(x_vals, MOMENT)
+        angle = self.Singularity.getAnalysis(x_vals, ANGLE)
+        deflection = self.Singularity.getAnalysis(x_vals, DEFLECTION)
 
         analysis_results = (x_vals, beam, shear, moment, angle, deflection)
         return analysis_results
         
-    def analyze(self):
+    def analyze(self, showLog=True):
         """Plots deflections and reports max values from analysis"""       
 
         # if len(self.BoundaryConditions) < 2:
         #     raise Exception(f"{ERROR_PREFIX_BEAM} cannot run analysis without 2 boundary conditions")
-
+        if showLog:
+            print("\n{:*^90}".format(" Analysis "))
         analysis = self.getAnalysis()
         x = analysis[0]
         beam = analysis[1]
@@ -178,12 +169,14 @@ class Beam(object):
 
         fig.tight_layout()
 
+        if showLog:
+            print("{:*^90}".format(""))
         # Report
         print(f"\nREPORT:")
-        print(f"Max shear:      {max_shear.getString()}")
-        print(f"Max moment:     {max_moment.getString()}")
-        print(f"Max angle:      {max_angle.getString()}")
-        print(f"Max deflection: {max_deflection.getString()}")
+        print("{:<20}{:>20}".format("Max shear:", max_shear.getString()))
+        print("{:<20}{:>20}".format("Max moment:", max_moment.getString()))
+        print("{:<20}{:>20}".format("Max angle:", max_angle.getString()))
+        print("{:<20}{:>20}".format("Max deflection:", max_deflection.getString()))
         print()
 
         plt.show()

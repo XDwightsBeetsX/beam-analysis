@@ -22,9 +22,9 @@ ANGLE_BC = "angle_bc"
 # ================================ #
 # ========= PREFIXES ============= #
 # ================================ #
-ERROR_PREFIX = "[BEAM_ANALYSIS] -"
-ERROR_PREFIX_BEAM = ERROR_PREFIX + " [BEAM] -"
-ERROR_PREFIX_SINGULARITY = ERROR_PREFIX + " [SINGULARITY] -"
+PREFIX = "[BEAM_ANALYSIS] -"
+PREFIX_BEAM = PREFIX + " [BEAM] -"
+PREFIX_SINGULARITY = PREFIX + " [SINGULARITY] -"
 
 
 # ================================ #

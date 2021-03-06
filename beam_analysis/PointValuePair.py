@@ -17,4 +17,4 @@ class PointValuePair(object):
         """
         '[value][units] @ [point]m'
         """
-        return f"{self.Value:.4f}{self.Units} @ {self.Point:.4f}m"
+        return "{:<8} {:<6} @ {:>4} [m]".format(round(self.Value, 5), self.Units, round(self.Point, 3))

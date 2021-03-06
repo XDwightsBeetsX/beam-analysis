@@ -21,15 +21,16 @@ git clone https://github.com/XDwightsBeetsX/beam-analysis
 
 ```shell
 python setup.py sdist bdist_wheel
-twine upload dist/*
+twine upload dist/* -u {SECRET :)} -p {SECRET :)}
 ```
 
 ## Mechanical Requirements
 
-- Curently `E, I, & L` as well as added loads must be in SI units  
-
-- All loads on the beam must be inputted  
-  - This does no solving  
+- 2-D beams only  
+- All loads and reactions must be inputted (no solving)  
+- Boundary conditions currently required
+  - must include one angle and one deflection condition
+- Beam weight can be represented by a distributed load (not default)
 
 ## Build Requirements
 
@@ -39,4 +40,49 @@ twine upload dist/*
 
 ### Samples
 
-![image](https://user-images.githubusercontent.com/55027279/108810029-ca40dc00-756f-11eb-8061-dd7638527273.png)  
+#### Modeling Cantilever Beam
+
+```python
+# define beam parameters
+E = 207 * 10**9
+I = 2 * 10**-8
+L = 1.0
+
+# make the beam and add loads
+B = Beam(L, E, I)
+B.addPointLoad(0, 11)
+B.addPointLoad(1, -10)
+B.addAppliedMoment(0, 11*1.0)
+B.addDistributedLoad(0, 1, -1.0)
+
+# boundary conditions are required for angle and deflection analysis
+B.addBoundaryCondition(0.0, "angle", 0.0)
+B.addBoundaryCondition(0.0, "deflection", 0.0)
+
+# run the analysis
+B.analyze()
+```
+![image](https://user-images.githubusercontent.com/55027279/110195643-3ccd7980-7e04-11eb-8d6a-df83fc0e20db.png)
+ 
+```shell
+running...
+E = 207000000000Pa
+I = 2e-08m^4
+L = 1.0m
+
+**************************************** Analysis ****************************************
+[BEAM_ANALYSIS] - [SINGULARITY] - running shear analysis: 11 + 0 + -1.0<x-0> + -10
+[BEAM_ANALYSIS] - [SINGULARITY] - running moment analysis: 11<x-0> + 11.0 + (-1.0/2)<x-0>^2 + -10<x-1>
+[BEAM_ANALYSIS] - [SINGULARITY] - running angle analysis: (11/2)<x-0>^2 + 11.0<x-0> + (-1.0/6)<x-0>^3 + (-10/2)<x-1>^2
+[BEAM_ANALYSIS] - [SINGULARITY] - angle c1 found: 0.0
+[BEAM_ANALYSIS] - [SINGULARITY] - running deflection analysis: (11/6)<x-0>^3 + (11.0/2)<x-0>^2 + (-1.0/24)<x-0>^4 + (-10/6)<x-1>^3
+[BEAM_ANALYSIS] - [SINGULARITY] - deflection c1 found: 0.0
+[BEAM_ANALYSIS] - [SINGULARITY] - deflection c2 found: 0.0
+******************************************************************************************
+
+REPORT:
+Max shear:          11.0     [N]    @  0.0 [m]
+Max moment:         21.5     [N-m]  @  1.0 [m]
+Max angle:          -0.00395 [rad]  @  1.0 [m]
+Max deflection:     -0.00176 [m]    @  1.0 [m]
+```
