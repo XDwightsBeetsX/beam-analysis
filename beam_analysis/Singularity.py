@@ -37,7 +37,7 @@ class Singularity(object):
             if showLog:
                 print(f"{PREFIX_SINGULARITY} running moment analysis: {self.getString(powerModifier=1)}")
             for i in range(n):
-                analysis_results[i] = self.evaluate(x_vals[i], 1)
+                analysis_results[i] = 1.0 * self.evaluate(x_vals[i], 1)
         elif analysis_type == ANGLE:
             if showLog:
                 print(f"{PREFIX_SINGULARITY} running angle analysis: {self.getString(powerModifier=2)}")
@@ -55,7 +55,7 @@ class Singularity(object):
             # Evaluate angles with c1
             for i in range(n):
                 val = self.evaluate(x_vals[i], 2) + c1
-                analysis_results[i] = (-1 / (self.E * self.I)) * val
+                analysis_results[i] = (1 / (self.E * self.I)) * val
         elif analysis_type == DEFLECTION:
             if showLog:
                 print(f"{PREFIX_SINGULARITY} running deflection analysis: {self.getString(powerModifier=3)}")
@@ -85,7 +85,7 @@ class Singularity(object):
             # Evaluate deflections with:  AppliedLoad(c1<x>) + c2
             for i in range(n):
                 termTot = self.evaluate(x_vals[i], 3) + c2
-                analysis_results[i] = (-1 / (self.E * self.I)) * termTot
+                analysis_results[i] = (1 / (self.E * self.I)) * termTot
             
             # Remove linear term C1 from C1<x> + C2
             self.Terms.remove(angleBcTerm)

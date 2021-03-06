@@ -110,7 +110,7 @@ B.addBoundaryCondition(0.0, "deflection", 0.0)
 B.analyze()
 ```
 
-![image](https://user-images.githubusercontent.com/55027279/110196372-aef48d00-7e09-11eb-84d5-bf0972b2fe3a.png)
+![image](https://user-images.githubusercontent.com/55027279/110196692-d77d8680-7e0b-11eb-8161-d1641e936f25.png)
 
 ```shell
 running...
@@ -129,8 +129,8 @@ L = 1.000 [m]
 ******************************************************************************************
 
 REPORT:
-Max shear:          11.0     [N]    @  0.0 [m]
-Max moment:         5.36974  [N-m]  @ 0.499 [m]
-Max angle:          0.00033  [rad]  @  0.0 [m]
-Max deflection:     0.00011  [m]    @ 0.499 [m]
+Max shear:          11.0     [N]    @    0.0 [m]
+Max moment:         5.36974  [N-m]  @  0.499 [m]
+Max angle:          -0.00033 [rad]  @    0.0 [m]
+Max deflection:     -0.00011 [m]    @  0.499 [m]
 ```
