@@ -2,12 +2,12 @@ import os
 from setuptools import setup, find_packages
 
 # PACKAGE NAME
-PKGNAME = "beam-analysis"
+PKGNAME = "beam_analysis"
 
 # VERSION - CHANGE BEFORE RUNNING, PYPI WILL NOT UPLOAD
-release = 1
-feature = 0
-update = 5
+release = 2
+feature = 1
+update = 0
 V = f"{release}.{feature}.{update}"
 print(f"[LOG] - Executing into version {V}")
 

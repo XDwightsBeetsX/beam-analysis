@@ -1,5 +1,10 @@
 """
 BEAM-ANALYSIS
+
+1. Define Beam Parameters
+2. Add Loads
+3. Input Boundary Conditions
+4. Run Analysis
 """
 
 from beam_analysis.Beam import Beam
@@ -19,22 +24,25 @@ if __name__ == "__main__":
     # =============================== #
     # = Make the beam and add loads = #
     # =============================== #
-    B = Beam(E, I, L)
-    B.addPointLoad(0, 10)
-    B.addPointLoad(1, 10)
-    B.addPointLoad(.5, -20)
+    B = Beam(L, E, I)
+    B.addPointLoad(0, 11)
+    B.addPointLoad(1, 11)
+    B.addPointLoad(0.5, -21)
+    B.addDistributedLoad(0, 1, -1.0)
 
     # =============================== #
-    # ========== Parameters ========= #
+    # === Add Boundary Conditions === #
+    # =============================== #
+    # currently req 1 to be angle and other to be deflection
+    B.addBoundaryCondition(0.5, "angle", 0.0)
+    B.addBoundaryCondition(0.0, "deflection", 0.0)
+
+    # =============================== #
+    # ======== Display Info ========= #
     # =============================== #
     B.showParams()
-    
+
     # =============================== #
-    # ========= Added loads ========= #
+    # ======== Run Analysis ========= #
     # =============================== #
-    # B.showForcesAndMoments()
-    
-    # =============================== #
-    # ==== Run Forrest Run!! ======== #
-    # =============================== #
-    B.evaluate()
+    B.analyze()
