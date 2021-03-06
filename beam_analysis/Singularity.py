@@ -16,7 +16,7 @@ class Singularity(object):
         self.Terms = appliedLoads
         self.BoundaryConditions = boundaryConditions
     
-    def getAnalysis(self, x_vals, analysis_type, showLog=True):
+    def getAnalysis(self, x_vals, analysis_type, showAnalysisLog=True):
         """
         Evaluates the terms at a series of points,
         which are modified depending on analysis type
@@ -29,17 +29,17 @@ class Singularity(object):
         n = len(x_vals)
         analysis_results = np.zeros(n)
         if analysis_type == SHEAR:
-            if showLog:
+            if showAnalysisLog:
                 print(f"{PREFIX_SINGULARITY} running shear analysis: V(x) = {self.getString()}")
             for i in range(n):
                 analysis_results[i] = self.evaluate(x_vals[i], 0)
         elif analysis_type == MOMENT:
-            if showLog:
+            if showAnalysisLog:
                 print(f"{PREFIX_SINGULARITY} running moment analysis: M(x) = {self.getString(powerModifier=1)}")
             for i in range(n):
                 analysis_results[i] = self.evaluate(x_vals[i], 1)
         elif analysis_type == ANGLE:
-            if showLog:
+            if showAnalysisLog:
                 print(f"{PREFIX_SINGULARITY} running angle analysis: EI*theta(x) = {self.getString(powerModifier=2)}")
             # Find boundary conditions
             for bc in self.BoundaryConditions:
@@ -49,7 +49,7 @@ class Singularity(object):
             # Solve for angle boundary condition
             pre_c1_tot = self.evaluate(angleBc.Location, 2)
             c1 = angleBc.Bc_value - pre_c1_tot
-            if showLog:
+            if showAnalysisLog:
                 print(f"{PREFIX_SINGULARITY} angle c1 found: {c1}")
             
             # Evaluate angles with c1
@@ -57,7 +57,7 @@ class Singularity(object):
                 val = self.evaluate(x_vals[i], 2) + c1
                 analysis_results[i] = (1 / (self.E * self.I)) * val
         elif analysis_type == DEFLECTION:
-            if showLog:
+            if showAnalysisLog:
                 print(f"{PREFIX_SINGULARITY} running deflection analysis: EI*y(x) = {self.getString(powerModifier=3)}")
             # Find boundary conditions
             for bc in self.BoundaryConditions:
@@ -69,7 +69,7 @@ class Singularity(object):
             # Solve for angle boundary condition
             pre_c1_tot = self.evaluate(angleBc.Location, 2)
             c1 = angleBc.Bc_value - pre_c1_tot
-            if showLog:
+            if showAnalysisLog:
                 print(f"{PREFIX_SINGULARITY} deflection c1 found: {c1}")
             
             # Add "applied load" 'angle_bc' to make linear term i.e. C1<x> + C2
@@ -79,7 +79,7 @@ class Singularity(object):
             # Solve for deflection boundary condition
             pre_c2_tot = self.evaluate(defBc.Location, 3)
             c2 = defBc.Bc_value - pre_c2_tot
-            if showLog:
+            if showAnalysisLog:
                 print(f"{PREFIX_SINGULARITY} deflection c2 found: {c2}")
             
             # Evaluate deflections with:  AppliedLoad(c1<x>) + c2

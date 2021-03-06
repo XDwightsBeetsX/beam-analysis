@@ -8,10 +8,10 @@ BEAM-ANALYSIS
 """
 
 from beam_analysis.Beam import Beam
+from beam_analysis.utils import PREFIX
 
 if __name__ == "__main__":
-    print("running...")
-    
+    print(f"{PREFIX} running...")    
     # =============================== #
     # ======= Youngs Modulus E ====== #
     # ===== Moment of Inertia I ===== #

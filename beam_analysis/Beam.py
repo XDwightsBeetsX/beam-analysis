@@ -90,7 +90,7 @@ class Beam(object):
         bc = BoundaryCondition(loc, bc_type, bc_value)
         self.Singularity.BoundaryConditions.append(bc)
 
-    def getAnalysis(self, n=10**3):
+    def getAnalysis(self, n=10**3, showAnalysisLog=True):
         """
         Returns tuple of analysis, all with len=n:  
             x       [0, L]  
@@ -102,22 +102,22 @@ class Beam(object):
         """
         x_vals = np.linspace(0, self.L, num=n)
         beam = np.zeros(n)
-        shear = self.Singularity.getAnalysis(x_vals, SHEAR)
-        moment = self.Singularity.getAnalysis(x_vals, MOMENT)
-        angle = self.Singularity.getAnalysis(x_vals, ANGLE)
-        deflection = self.Singularity.getAnalysis(x_vals, DEFLECTION)
+        shear = self.Singularity.getAnalysis(x_vals, SHEAR, showAnalysisLog=showAnalysisLog)
+        moment = self.Singularity.getAnalysis(x_vals, MOMENT, showAnalysisLog=showAnalysisLog)
+        angle = self.Singularity.getAnalysis(x_vals, ANGLE, showAnalysisLog=showAnalysisLog)
+        deflection = self.Singularity.getAnalysis(x_vals, DEFLECTION, showAnalysisLog=showAnalysisLog)
 
         analysis_results = (x_vals, beam, shear, moment, angle, deflection)
         return analysis_results
         
-    def analyze(self, showLog=True):
+    def analyze(self, showAnalysisLog=True):
         """Plots deflections and reports max values from analysis"""       
 
         # if len(self.BoundaryConditions) < 2:
         #     raise Exception(f"{ERROR_PREFIX_BEAM} cannot run analysis without 2 boundary conditions")
-        if showLog:
+        if showAnalysisLog:
             print("\n{:*^150}".format(" Analysis "))
-        analysis = self.getAnalysis()
+        analysis = self.getAnalysis(showAnalysisLog=showAnalysisLog)
         x = analysis[0]
         beam = analysis[1]
         shear = analysis[2]
@@ -175,7 +175,6 @@ class Beam(object):
             max_shear.Value /= 1000
             max_shear.Units = "[kN]"
         if abs(max_moment.Value) > 1000:
-            print(max_moment.Value)
             max_moment.Value /= 1000
             max_moment.Units = "[kN-m]"
         

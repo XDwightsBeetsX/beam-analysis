@@ -5,8 +5,8 @@ PointValuePair class used for maximum values in Beam
 
 class PointValuePair(object):
     """
-    Stores a point and value.  
-    Offers a show() method
+    Stores a point and value along with units.  
+    Offers a getString() method
     """
     def __init__(self, point, value, units):
         self.Point = point
