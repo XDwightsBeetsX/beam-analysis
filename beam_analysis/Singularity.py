@@ -54,7 +54,7 @@ class Singularity(object):
             
             # Evaluate angles with c1
             for i in range(n):
-                val = self.evaluate(x_vals[i], 2)
+                val = self.evaluate(x_vals[i], 2) + c1
                 analysis_results[i] = (-1 / (self.E * self.I)) * val
         elif analysis_type == DEFLECTION:
             if showLog:
@@ -93,7 +93,6 @@ class Singularity(object):
             raise Exception(f"{PREFIX_SINGULARITY} invalid analysis type: '{analysis_type}'")
         
         return analysis_results
-
 
     def evaluate(self, point, powerModifier):
         termTot = 0.0

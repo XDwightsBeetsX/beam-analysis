@@ -41,16 +41,15 @@ class AppliedLoad(object):
             return f"({self.Coefficient}/{np.math.factorial(effPower)})<x-{self.Start}>^{effPower}"
     
     def evaluate(self, point, powerModifier):
-        effPower = self.Power + powerModifier
         if point < self.Start:
             return 0
-        elif effPower < 0:
-            return 0
-        elif effPower == 0:
-            return self.Coefficient
-        elif self.Coefficient == 0:
-            return 0
-        elif effPower == 1:
-            return self.Coefficient * (point - self.Start)
         else:
-            return (self.Coefficient / np.math.factorial(effPower)) * (point - self.Start)**(effPower)
+            effPower = self.Power + powerModifier
+            if effPower < 0:
+                return 0
+            elif effPower == 0:
+                return self.Coefficient
+            elif effPower == 1:
+                return self.Coefficient * (point - self.Start)
+            else:
+                return (self.Coefficient / np.math.factorial(effPower)) * (point - self.Start)**(effPower)
