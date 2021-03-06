@@ -30,17 +30,17 @@ class Singularity(object):
         analysis_results = np.zeros(n)
         if analysis_type == SHEAR:
             if showLog:
-                print(f"{PREFIX_SINGULARITY} running shear analysis: {self.getString()}")
+                print(f"{PREFIX_SINGULARITY} running shear analysis: V(x) = {self.getString()}")
             for i in range(n):
                 analysis_results[i] = self.evaluate(x_vals[i], 0)
         elif analysis_type == MOMENT:
             if showLog:
-                print(f"{PREFIX_SINGULARITY} running moment analysis: {self.getString(powerModifier=1)}")
+                print(f"{PREFIX_SINGULARITY} running moment analysis: M(x) = {self.getString(powerModifier=1)}")
             for i in range(n):
-                analysis_results[i] = 1.0 * self.evaluate(x_vals[i], 1)
+                analysis_results[i] = self.evaluate(x_vals[i], 1)
         elif analysis_type == ANGLE:
             if showLog:
-                print(f"{PREFIX_SINGULARITY} running angle analysis: {self.getString(powerModifier=2)}")
+                print(f"{PREFIX_SINGULARITY} running angle analysis: EI*theta(x) = {self.getString(powerModifier=2)}")
             # Find boundary conditions
             for bc in self.BoundaryConditions:
                 if bc.Bc_type == ANGLE:
@@ -58,7 +58,7 @@ class Singularity(object):
                 analysis_results[i] = (1 / (self.E * self.I)) * val
         elif analysis_type == DEFLECTION:
             if showLog:
-                print(f"{PREFIX_SINGULARITY} running deflection analysis: {self.getString(powerModifier=3)}")
+                print(f"{PREFIX_SINGULARITY} running deflection analysis: EI*y(x) = {self.getString(powerModifier=3)}")
             # Find boundary conditions
             for bc in self.BoundaryConditions:
                 if bc.Bc_type == ANGLE:

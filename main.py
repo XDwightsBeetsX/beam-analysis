@@ -25,10 +25,10 @@ if __name__ == "__main__":
     # = Make the beam and add loads = #
     # =============================== #
     B = Beam(L, E, I)
-    B.addPointLoad(0, 11)
-    B.addPointLoad(1, 11)
-    B.addPointLoad(0.5, -21)
-    B.addDistributedLoad(0, 1, -1.0)
+    B.addPointLoad(0, 11000)
+    B.addPointLoad(1, 11000)
+    B.addPointLoad(0.5, -21000)
+    B.addDistributedLoad(0, 1, -1000)
 
     # =============================== #
     # === Add Boundary Conditions === #
