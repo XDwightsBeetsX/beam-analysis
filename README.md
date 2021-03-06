@@ -10,11 +10,11 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 ## Usage
 
 ```shell
-pip install beam_analysis
+pip install beam-analysis
 ```
 
 ```shell
-git clone https://github.com/XDwightsBeetsX/beam-analysis
+git clone https://github.com/XDwightsBeetsX/beam_analysis
 ```
 
 ### Continuous development using `twine`
