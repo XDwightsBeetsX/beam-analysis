@@ -5,11 +5,12 @@ Primary file for beam_analysis
 import numpy as np
 from matplotlib import pyplot as plt
 
-from .Singularity import Singularity
-from .BoundaryCondition import BoundaryCondition
-from .AppliedLoad import AppliedLoad
-from .PointValuePair import PointValuePair
-from .utils import *
+from beam_analysis.Singularity import Singularity
+from beam_analysis.BoundaryCondition import BoundaryCondition
+from beam_analysis.AppliedLoad import AppliedLoad
+from beam_analysis.PointValuePair import PointValuePair
+from beam_analysis.utils import PREFIX_BEAM, DISTRIBUTED_LOAD, POINT_LOAD, SHEAR, MOMENT, ANGLE, DEFLECTION,\
+                    CONVERSION_D_TO_SI, CONVERSION_F_TO_SI, CONVERSION_M_TO_SI
 
 
 class Beam(object):
@@ -23,9 +24,10 @@ class Beam(object):
         self.Singularity = Singularity(l, e, i)
     
     def showParams(self):
-        print(f"E = {(self.E/10E6):.3e} [MPa]")
-        print(f"I = {self.I:.3e} [m^4]")
-        print(f"L = {self.L:.3f} [m]")
+        print("\n{:*^50}".format(" Beam Parameters "))
+        print(f"{PREFIX_BEAM} E = {(self.E/10E6):.3e} [MPa]")
+        print(f"{PREFIX_BEAM} I = {self.I:.3e} [m^4]")
+        print(f"{PREFIX_BEAM} L = {self.L:.3f} [m]")
     
     def showSingularityString(self, analysis_type=SHEAR):
         print(self.Singularity.getString())
@@ -89,7 +91,7 @@ class Beam(object):
         bc = BoundaryCondition(loc, bc_type, bc_value)
         self.Singularity.BoundaryConditions.append(bc)
 
-    def getAnalysis(self, n=10**3):
+    def getAnalysis(self, n=10**3, showAnalysisLog=True):
         """
         Returns tuple of analysis, all with len=n:  
             x       [0, L]  
@@ -101,22 +103,22 @@ class Beam(object):
         """
         x_vals = np.linspace(0, self.L, num=n)
         beam = np.zeros(n)
-        shear = self.Singularity.getAnalysis(x_vals, SHEAR)
-        moment = self.Singularity.getAnalysis(x_vals, MOMENT)
-        angle = self.Singularity.getAnalysis(x_vals, ANGLE)
-        deflection = self.Singularity.getAnalysis(x_vals, DEFLECTION)
+        shear = self.Singularity.getAnalysis(x_vals, SHEAR, showAnalysisLog=showAnalysisLog)
+        moment = self.Singularity.getAnalysis(x_vals, MOMENT, showAnalysisLog=showAnalysisLog)
+        angle = self.Singularity.getAnalysis(x_vals, ANGLE, showAnalysisLog=showAnalysisLog)
+        deflection = self.Singularity.getAnalysis(x_vals, DEFLECTION, showAnalysisLog=showAnalysisLog)
 
         analysis_results = (x_vals, beam, shear, moment, angle, deflection)
         return analysis_results
         
-    def analyze(self, showLog=True):
+    def analyze(self, showAnalysisLog=True):
         """Plots deflections and reports max values from analysis"""       
 
         # if len(self.BoundaryConditions) < 2:
         #     raise Exception(f"{ERROR_PREFIX_BEAM} cannot run analysis without 2 boundary conditions")
-        if showLog:
-            print("\n{:*^90}".format(" Analysis "))
-        analysis = self.getAnalysis()
+        if showAnalysisLog:
+            print("\n{:*^150}".format(" Analysis "))
+        analysis = self.getAnalysis(showAnalysisLog=showAnalysisLog)
         x = analysis[0]
         beam = analysis[1]
         shear = analysis[2]
@@ -168,15 +170,20 @@ class Beam(object):
         ax[1,1].set(xlabel=xlabel, title=t4)
 
         fig.tight_layout()
-
-        if showLog:
-            print("{:*^90}".format(""))
+        
         # Report
-        print(f"\nREPORT:")
-        print("{:<20}{:>20}".format("Max shear:", max_shear.getString()))
-        print("{:<20}{:>20}".format("Max moment:", max_moment.getString()))
-        print("{:<20}{:>20}".format("Max angle:", max_angle.getString()))
-        print("{:<20}{:>20}".format("Max deflection:", max_deflection.getString()))
+        if abs(max_shear.Value) > 1000:
+            max_shear.Value /= 1000
+            max_shear.Units = "[kN]"
+        if abs(max_moment.Value) > 1000:
+            max_moment.Value /= 1000
+            max_moment.Units = "[kN-m]"
+        
+        print("\n{:*^80}".format(" Report "))
+        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max shear:", max_shear.getString()))
+        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max moment:", max_moment.getString()))
+        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max angle:", max_angle.getString()))
+        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max deflection:", max_deflection.getString()))
         print()
 
         plt.show()

@@ -8,10 +8,10 @@ BEAM-ANALYSIS
 """
 
 from beam_analysis.Beam import Beam
+from beam_analysis.utils import PREFIX
 
 if __name__ == "__main__":
-    print("running...")
-    
+    print(f"{PREFIX} running...")    
     # =============================== #
     # ======= Youngs Modulus E ====== #
     # ===== Moment of Inertia I ===== #
@@ -19,22 +19,32 @@ if __name__ == "__main__":
     # =============================== #
     E = 207 * 10**9
     I = 2 * 10**-8
-    L = 1.0
+    
+    a = 2
+    b = 1
+    L = 2*a + b
+    w = 100
+    P = 1000
 
     # =============================== #
     # = Make the beam and add loads = #
     # =============================== #
     B = Beam(L, E, I)
-    B.addPointLoad(0, 11)
-    B.addPointLoad(1, 11)
-    B.addPointLoad(0.5, -21)
-    B.addDistributedLoad(0, 1, -1.0)
+    
+    B.addDistributedLoad(0, a, -w)
+    B.addPointLoad(a+b/2, -P)
+    B.addDistributedLoad(a+b, L, -w)
+
+    rb = (1/L)*(w*a*(2*a+b)+P*(a+b/2))
+    ra = rb
+    B.addPointLoad(0, ra)
+    B.addPointLoad(L, rb)
 
     # =============================== #
     # === Add Boundary Conditions === #
     # =============================== #
     # currently req 1 to be angle and other to be deflection
-    B.addBoundaryCondition(0.5, "angle", 0.0)
+    B.addBoundaryCondition(L/2, "angle", 0.0)
     B.addBoundaryCondition(0.0, "deflection", 0.0)
 
     # =============================== #

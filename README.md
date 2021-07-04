@@ -1,7 +1,7 @@
 # beam_analysis
 
 [![Build Status](https://travis-ci.com/XDwightsBeetsX/beam_analysis.svg?token=ojR96vWaxNB8o4NF9oGN&branch=master)](https://travis-ci.com/XDwightsBeetsX/beam_analysis)
- [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/XDwightsBeetsX/beam_analysis.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/XDwightsBeetsX/beam_analysis/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/XDwightsBeetsX/beam_analysis.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/XDwightsBeetsX/beam_analysis/alerts/)  
 [![PyPI version](https://badge.fury.io/py/beam-analysis.svg)](https://badge.fury.io/py/beam-analysis)
@@ -12,11 +12,11 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 ## Usage
 
 ```shell
-pip install beam_analysis
+pip install beam-analysis
 ```
 
 ```shell
-git clone https://github.com/XDwightsBeetsX/beam-analysis
+git clone https://github.com/XDwightsBeetsX/beam_analysis
 ```
 
 ### Continuous development using `twine`
@@ -64,8 +64,9 @@ B.addBoundaryCondition(0.0, "deflection", 0.0)
 # run the analysis
 B.analyze()
 ```
+
 ![image](https://user-images.githubusercontent.com/55027279/110195643-3ccd7980-7e04-11eb-8d6a-df83fc0e20db.png)
- 
+
 ```shell
 running...
 E = 207000000000Pa

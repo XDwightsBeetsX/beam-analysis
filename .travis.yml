@@ -10,7 +10,7 @@ dist: xenial
 
 jobs:
   include:    
-    - name: Test & Deploy
+    - name: tests
       if: branch = master
       script:
         # Orient
@@ -19,14 +19,4 @@ jobs:
         - pip install -r requirements.txt
         # Test"
         - pytest
-        # Bundle Distribution
-        - python setup.py sdist bdist_wheel
-        # Deploy to testpypi
-        - twine upload dist/* -r testpypi -u ${PYPI_TEST_USERNAME} -p ${PYPI_TEST_PASSWORD}
-        # Deploy to pypi
-        - twine upload dist/* -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD}
-        # Clean Files
-        - dir
-        - rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info
-        - dir
        
