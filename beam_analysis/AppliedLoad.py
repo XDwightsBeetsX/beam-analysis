@@ -4,7 +4,7 @@ AppliedLoad class used in Beam and Singularity
 
 import numpy as np
 
-from .utils import MOMENT, POINT_LOAD, DISTRIBUTED_LOAD, ANGLE_BC
+from beam_analysis.utils import MOMENT, POINT_LOAD, DISTRIBUTED_LOAD, ANGLE_BC
 
 
 class AppliedLoad(object):

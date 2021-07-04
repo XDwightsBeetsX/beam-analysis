@@ -1,6 +1,6 @@
 
 
-from .utils import DEFLECTION
+from beam_analysis.utils import DEFLECTION
 
 
 class BoundaryCondition(object):

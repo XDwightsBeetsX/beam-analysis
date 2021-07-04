@@ -5,11 +5,11 @@ Primary file for beam_analysis
 import numpy as np
 from matplotlib import pyplot as plt
 
-from .Singularity import Singularity
-from .BoundaryCondition import BoundaryCondition
-from .AppliedLoad import AppliedLoad
-from .PointValuePair import PointValuePair
-from .utils import PREFIX_BEAM, DISTRIBUTED_LOAD, POINT_LOAD, SHEAR, MOMENT, ANGLE, DEFLECTION,\
+from beam_analysis.Singularity import Singularity
+from beam_analysis.BoundaryCondition import BoundaryCondition
+from beam_analysis.AppliedLoad import AppliedLoad
+from beam_analysis.PointValuePair import PointValuePair
+from beam_analysis.utils import PREFIX_BEAM, DISTRIBUTED_LOAD, POINT_LOAD, SHEAR, MOMENT, ANGLE, DEFLECTION,\
                     CONVERSION_D_TO_SI, CONVERSION_F_TO_SI, CONVERSION_M_TO_SI
 
 
