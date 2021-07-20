@@ -1,113 +1,96 @@
-"""
-Used by Beam to make functions for shear/moment...
-"""
 
 import numpy as np
 
-from beam_analysis.AppliedLoad import AppliedLoad
-from beam_analysis.utils import PREFIX_SINGULARITY, SHEAR, MOMENT, ANGLE, DEFLECTION, ANGLE_BC
+from beam_analysis.AppliedLoad import AppliedLoadType, DistributedLoad, Moment
+from beam_analysis.Beam import BeamAnalysisTypes
 
 
 class Singularity(object):
-    def __init__(self, l, e, i, appliedLoads=[], boundaryConditions=[]):
-        self.L = l
+    def __init__(self, length, e, i, appliedLoads=[], boundaryConditions=[]):
+        """
+        `length` - Beam length
+
+        `e` - Young's Modulus
+
+        `i` - Moment of Intertia
+
+        `appliedLoads` - (optional) a list of AppliedLoads in this Singularity Eq'n
+
+        `boundaryConditions` - (optional) a list of BoundaryConditions in this Singularity Eq'n
+        """
+        self.L = length
         self.E = e
         self.I = i
-        self.Terms = appliedLoads
+        self.AppliedLoads = appliedLoads
         self.BoundaryConditions = boundaryConditions
     
-    def getAnalysis(self, x_vals, analysis_type, showAnalysisLog=True):
+
+    def addAppliedLoad(self, appliedLoad):
         """
-        Evaluates the terms at a series of points,
-        which are modified depending on analysis type
+        `appliedLoad` - distributed load, point load, moment
         """
-        if analysis_type == ANGLE and len(self.BoundaryConditions) < 1:
-            raise Exception(f"{PREFIX_SINGULARITY} cannot evaluate angle with <1 boundary conditions")
-        elif analysis_type == DEFLECTION and len(self.BoundaryConditions) < 2:
-            raise Exception(f"{PREFIX_SINGULARITY} cannot evaluate deflection with <2 boundary conditions")
+        if type(appliedLoad) is AppliedLoadType.DISTRIBUTED_LOAD:
+            counterLoad = DistributedLoad(appliedLoad.stop, self.L, -appliedLoad.Magnitude)
+            self.AppliedLoads.append(counterLoad)
+        self.AppliedLoads.append(appliedLoad)
 
-        n = len(x_vals)
-        analysis_results = np.zeros(n)
-        if analysis_type == SHEAR:
-            if showAnalysisLog:
-                print(f"{PREFIX_SINGULARITY} running shear analysis: V(x) = {self.getString()}")
-            for i in range(n):
-                analysis_results[i] = self.evaluate(x_vals[i], 0)
-        elif analysis_type == MOMENT:
-            if showAnalysisLog:
-                print(f"{PREFIX_SINGULARITY} running moment analysis: M(x) = {self.getString(powerModifier=1)}")
-            for i in range(n):
-                analysis_results[i] = self.evaluate(x_vals[i], 1)
-        elif analysis_type == ANGLE:
-            if showAnalysisLog:
-                print(f"{PREFIX_SINGULARITY} running angle analysis: EI*theta(x) = {self.getString(powerModifier=2)}")
-            # Find boundary conditions
-            for bc in self.BoundaryConditions:
-                if bc.Bc_type == ANGLE:
-                    angleBc = bc
-            
-            # Solve for angle boundary condition
-            pre_c1_tot = self.evaluate(angleBc.Location, 2)
-            c1 = angleBc.Bc_value - pre_c1_tot
-            if showAnalysisLog:
-                print(f"{PREFIX_SINGULARITY} angle c1 found: {c1}")
-            
-            # Evaluate angles with c1
-            for i in range(n):
-                val = self.evaluate(x_vals[i], 2) + c1
-                analysis_results[i] = (1 / (self.E * self.I)) * val
-        elif analysis_type == DEFLECTION:
-            if showAnalysisLog:
-                print(f"{PREFIX_SINGULARITY} running deflection analysis: EI*y(x) = {self.getString(powerModifier=3)}")
-            # Find boundary conditions
-            for bc in self.BoundaryConditions:
-                if bc.Bc_type == ANGLE:
-                    angleBc = bc
-                elif bc.Bc_type == DEFLECTION:
-                    defBc = bc
-            
-            # Solve for angle boundary condition
-            pre_c1_tot = self.evaluate(angleBc.Location, 2)
-            c1 = angleBc.Bc_value - pre_c1_tot
-            if showAnalysisLog:
-                print(f"{PREFIX_SINGULARITY} deflection c1 found: {c1}")
-            
-            # Add "applied load" 'angle_bc' to make linear term i.e. C1<x> + C2
-            angleBcTerm = AppliedLoad(0, c1, ANGLE_BC)
-            self.Terms.append(angleBcTerm)
 
-            # Solve for deflection boundary condition
-            pre_c2_tot = self.evaluate(defBc.Location, 3)
-            c2 = defBc.Bc_value - pre_c2_tot
-            if showAnalysisLog:
-                print(f"{PREFIX_SINGULARITY} deflection c2 found: {c2}")
-            
-            # Evaluate deflections with:  AppliedLoad(c1<x>) + c2
-            for i in range(n):
-                termTot = self.evaluate(x_vals[i], 3) + c2
-                analysis_results[i] = (1 / (self.E * self.I)) * termTot
-            
-            # Remove linear term C1 from C1<x> + C2
-            self.Terms.remove(angleBcTerm)
-        else:
-            raise Exception(f"{PREFIX_SINGULARITY} invalid analysis type: '{analysis_type}'")
+    def addBoundaryCondition(self, boundaryCondition):
+        """
+        `boundaryCondition` - BoundaryCondition to add
+        """
+        self.BoundaryConditions.append(boundaryCondition)
+
+
+    def evaluateAt(self, x, beamAnalysisType):
+        """
+        `x` - distance along the beam to evaluate the singularity function at
+
+        `beamAnalysisType` - shear, moment, angle, deflection
+        """
+        val = 0
         
-        return analysis_results
+        for load in self.AppliedLoads:
+            t = type(load)
+            # beamAnalysisType follows  0, 1, 2, 3
+            # AppliedLoadType follows   1, 2, 3
+            if t is AppliedLoadType.DISTRIBUTED_LOAD:
+                if (load.Start <= x and x <= load.Stop):
+                    val += (load.Magnitude / load.PowerModifier) * (x - load.Start) ** (beamAnalysisType.value + load.PowerModifier)
+            
+            elif t is AppliedLoadType.POINT_LOAD:
+                if (x == load.location):
+                    val += (load.Magnitude / load.PowerModifier) * (x) ** (beamAnalysisType.value + load.PowerModifier)
 
-    def evaluate(self, point, powerModifier):
-        termTot = 0.0
-        for term in self.Terms:
-            termTot += term.evaluate(point, powerModifier)
-        
-        return termTot
+            elif t is AppliedLoadType.MOMENT:
+                if (x == load.location):
+                    val += (load.Magnitude / load.PowerModifier) * (x) ** (beamAnalysisType.value + load.PowerModifier)
+            
+        return val
     
-    def getString(self, powerModifier=0):
+
+    def getString(self, beamAnalysisType):
+        """
+        `beamAnalysisType` - shear, moment, angle, deflection
+
+        returns a string representation of the singularity function
+        """
         s = ""
-        for i, term in enumerate(sorted(self.Terms, key=lambda t: t.Start)):
-            ts = term.getString(powerModifier=powerModifier)
-            if i == 0:
-                s += ts
-            else:
-                s += " + " + ts
+        for i in range(len(self.AppliedLoads)):
+            load = self.AppliedLoads[i]
+            t = type(load)
+            # beamAnalysisType follows  0, 1, 2, 3
+            # AppliedLoadType follows   1, 2, 3
+            if t is AppliedLoadType.DISTRIBUTED_LOAD:
+                s += f"({load.Magnitude} / {load.PowerModifier}) * <x - {load.Start}>^{beamAnalysisType.value + load.PowerModifier}"
+            
+            elif t is AppliedLoadType.POINT_LOAD:
+                s += f"({load.Magnitude} / {load.PowerModifier}) * x^{beamAnalysisType.value + load.PowerModifier}"
+
+            elif t is AppliedLoadType.MOMENT:
+                s += f"({load.Magnitude} / {load.PowerModifier}) * x^{beamAnalysisType.value + load.PowerModifier}"
+            
+            if i != len(self.AppliedLoads)-1:
+                s += " + "
         
-        return s
+        return s            
