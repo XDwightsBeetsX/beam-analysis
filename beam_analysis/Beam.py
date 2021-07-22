@@ -1,10 +1,11 @@
 
 import numpy as np
-from enum import Enum
 from matplotlib import pyplot as plt
 
-from beam_analysis.AppliedLoad import AppliedLoadType, DistributedLoad, PointLoad, Moment
+from beam_analysis.Enums import Planes, BeamAnalysisTypes, BoundaryConditionTypes
+
 from beam_analysis.Singularity import Singularity
+from beam_analysis.AppliedLoad import DistributedLoad, PointLoad, Moment
 from beam_analysis.BoundaryCondition import BoundaryCondition
 
 
@@ -39,11 +40,10 @@ class Beam(object):
 
         `plane` - the area in which the laod acts. XY, XZ
         """
-        newDistributedLoad = DistributedLoad(start, stop, magnitude)
         if plane == Planes.XY:
-            self.SingularityXY.addAppliedLoad(newDistributedLoad)
+            self.SingularityXY.addAppliedLoad(DistributedLoad(start, stop, magnitude))
         elif plane == Planes.XZ:
-            self.SingularityXZ.addAppliedLoad(newDistributedLoad)
+            self.SingularityXZ.addAppliedLoad(DistributedLoad(start, stop, magnitude))
         else:
             raise Exception(f"invalid parameters: {start}, {stop}, {magnitude}, {plane}")
 
@@ -92,32 +92,35 @@ class Beam(object):
 
         `plane` - the area in which the laod acts. XY, XZ
         """
-        newBoundaryCondition = BoundaryCondition(location, boundaryConditionType, boundaryConditionValue)
         if plane == Planes.XY:
-            self.SingularityXY.addBoundaryCondition(newBoundaryCondition)
+            self.SingularityXY.addBoundaryCondition(BoundaryCondition(location, boundaryConditionType, boundaryConditionValue))
         elif plane == Planes.XZ:
-            self.SingularityXZ.addBoundaryCondition()(newBoundaryCondition)
+            self.SingularityXZ.addBoundaryCondition()(BoundaryCondition(location, boundaryConditionType, boundaryConditionValue))
         else:
             raise Exception(f"invalid parameters: {location}, {boundaryConditionType}, {boundaryConditionValue}, {plane}")
     
 
     def runAnalysis(self, n=10**3, showAnalysisLog=True):
         """
+        `n` - optional number of data points to run the analysis, default is 10^3
         
+        `showAnalysisLog` - toggle console output notifications, basically the Singularity functions. (report displays regardless)
         """
-        pass
+        xVals = np.linspace(0, self.L, n)
 
+        xyShear, xyBending, xyAngle, xyDeflection = [], [], [], []
+        xzShear, xzBending, xzAngle, xzDeflection = [], [], [], []
+        
+        for x in xVals:
+            xyShear.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.SHEAR))
+            xyBending.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.BENDING))
+            xyAngle.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.ANGLE))
+            xyDeflection.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.DEFLECTION))
 
-class BeamAnalysisTypes(Enum):
-    """
-    The assigned values here matter and are used in Singularity analysis
-    """
-    SHEAR = 0
-    MOMENT = 1
-    ANGLE = 2
-    DEFLECTION = 3
-
-
-class Planes(Enum):
-    XY = 1
-    XZ = 2
+            xzShear.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.SHEAR))
+            xzBending.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.BENDING))
+            xzAngle.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.ANGLE))
+            xzDeflection.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.DEFLECTION))
+        
+        plt.plot(xVals, xyShear, xVals, xyBending)
+        plt.show()

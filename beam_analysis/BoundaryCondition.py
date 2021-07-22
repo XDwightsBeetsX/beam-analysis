@@ -1,9 +1,9 @@
 
-from enum import Enum
+from beam_analysis.Enums import BoundaryConditionTypes
+
 
 class BoundaryCondition(object):
-    
-    def __init__(self, location, boundaryConditionType, boundaryConditionValue, plane):
+    def __init__(self, location, boundaryConditionType, boundaryConditionValue):
         """
         `location` - the distance along the beam to the boundary condition
 
@@ -14,8 +14,3 @@ class BoundaryCondition(object):
         self.Location = location
         self.BoundaryConditionType = boundaryConditionType
         self.BoundaryConditionValue = boundaryConditionValue
-
-
-class BoundaryConditionTypes(Enum):
-    ANGLE = 1
-    DEFLECTION = 2
