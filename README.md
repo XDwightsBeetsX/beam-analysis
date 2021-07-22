@@ -12,7 +12,7 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 ## Usage
 
 ```shell
-pip install beam-analysis
+pip install beam_analysis
 ```
 
 ```shell
