@@ -72,8 +72,8 @@ class Beam(object):
         xzComp = np.sin(rads)
         if (xzComp != 0):
             self.SingularityXZ.addAppliedLoad(PointLoad(location, xzComp * magnitude))
-        print(rads, xyComp, xzComp)
 
+    
     def addAppliedMoment(self, location, magnitude, angle):
         """
         `location` - the distance along the beam to the boundary condition
@@ -116,6 +116,7 @@ class Beam(object):
         """
         self.SingularityXY.solve()
         self.SingularityXZ.solve()
+        
         print("Singularity functions in XY plane:")
         print(self.SingularityXY.getString(BeamAnalysisTypes.SHEAR))
         print(self.SingularityXY.getString(BeamAnalysisTypes.BENDING))

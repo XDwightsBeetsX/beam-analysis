@@ -19,8 +19,17 @@ class Singularity(object):
         self.L = length
         self.E = e
         self.I = i
-        self.AppliedLoads = appliedLoads
-        self.BoundaryConditions = boundaryConditions
+
+        if len(appliedLoads) > 0:
+            self.AppliedLoads = appliedLoads
+        else:
+            self.AppliedLoads = []
+
+        if len(boundaryConditions) > 0:
+            self.BoundaryConditions = boundaryConditions
+        else:
+            self.BoundaryConditions = []
+
         self.C1 = 0
         self.C2 = 0
     
@@ -106,6 +115,9 @@ class Singularity(object):
             if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
                 val += self.C2
         
+        if beamAnalysisType == BeamAnalysisTypes.ANGLE or beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            val /= (self.E * self.I)
+        
         return val
     
 
@@ -118,6 +130,9 @@ class Singularity(object):
         returns a string representation of the singularity function
         """
         s = ""
+        if len(self.AppliedLoads) == 0:
+            return "no applied loads"
+        
         for i in range(len(self.AppliedLoads)):
             load = self.AppliedLoads[i]
             if (load.Magnitude == 0):
