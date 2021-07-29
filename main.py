@@ -8,39 +8,48 @@ BEAM-ANALYSIS
 """
 
 from beam_analysis.Beam import Beam
-from beam_analysis.Enums import Planes, BoundaryConditionTypes
+from beam_analysis.Enums import BoundaryConditionTypes
 
 
 if __name__ == "__main__":
     # =================================== #
     #    1. Define Beam Parameters        #
     # =================================== #
-    #    E - Youngs Modulus               #
-    #    I - Moment of Inertia I          #
-    #    L - Beam Length                  #
+    # E - Youngs Modulus                  #
+    # I - Moment of Inertia I             #
+    # L - Beam Length                     #
     # =================================== #
-    E = 207 * 10**9
+    E = 20 * 10**9
     I = 2 * 10**-8
-    L = 4
-    
+    L = 1
+
     B = Beam(L, E, I)
 
 
     # =================================== #
     #    2. Add Loads                     #
     # =================================== #
-    # B.addDistributedLoad(0, L, -1000, Planes.XY)
-    B.addPointLoad(L/2, -10000, Planes.XY)
-    B.addPointLoad(0, 10000/2, Planes.XY)
-    B.addPointLoad(L, 10000/2, Planes.XY)
+    # Use theta = 0 to indicate XY plane  #
+    # Use theta = 90 to indicate XZ plane #
+    #                                     #
+    #           | (90 - XZ plane)         #
+    #        \  |                         #
+    #         \ |                         #
+    #          \|________ (0 - XY plane)  #
+    # =================================== #
+    B.addPointLoad(0, 10/2, 0)
+    B.addPointLoad(L/2, -10, 0)
+    B.addPointLoad(L, 10/2, 0)
 
 
     # =================================== #
     #    3. Input Boundary Conditions     #
     # =================================== #
-    # TODO currently req 1 to be angle and other to be deflection
-    B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0.0, Planes.XY)
-    B.addBoundaryCondition(0.0, BoundaryConditionTypes.DEFLECTION, 0.0, Planes.XY)
+    # Use the loading angle convention    #
+    # =================================== #
+    # B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0.0)
+    B.addBoundaryCondition(0.0, BoundaryConditionTypes.DEFLECTION, 0.0)
+    B.addBoundaryCondition(L, BoundaryConditionTypes.DEFLECTION, 0.0)
 
 
     # =================================== #

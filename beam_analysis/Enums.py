@@ -2,11 +2,6 @@
 from enum import Enum
 
 
-class Planes(Enum):
-    XY = 1
-    XZ = 2
-
-
 class AppliedLoadTypes(Enum):
     """
     The assigned values here matter and are used in Singularity analysis
@@ -20,10 +15,10 @@ class BeamAnalysisTypes(Enum):
     """
     The assigned values here matter and are used in Singularity analysis
     """
-    SHEAR = 0
-    BENDING = 1
-    ANGLE = 2
-    DEFLECTION = 3
+    SHEAR = 1
+    BENDING = 2
+    ANGLE = 3
+    DEFLECTION = 4
 
 
 class BoundaryConditionTypes(Enum):
