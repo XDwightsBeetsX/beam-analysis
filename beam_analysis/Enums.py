@@ -2,6 +2,14 @@
 from enum import Enum
 
 
+
+class Units(Enum):
+    Shear = 1
+    Bending = 2
+    Angle = 3
+    Deflection = 4
+
+
 class AppliedLoadTypes(Enum):
     """
     The assigned values here matter and are used in Singularity analysis

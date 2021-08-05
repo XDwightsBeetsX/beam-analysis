@@ -69,14 +69,17 @@ class Singularity(object):
             elif bc.Type == BoundaryConditionTypes.DEFLECTION:
                 deflectionBcs.append(bc)
         
-        if len(angleBcs) == 1 and 0 < len(deflectionBcs):
+        if 0 < len(angleBcs) and 0 < len(deflectionBcs):
             # use one angleBc and the first deflectionBc
             angleBc = angleBcs[0]
-            self.C1 = (angleBc.Value * self.E * self.I) - self.evaluateAt(angleBc.Location, BoundaryConditionTypes.ANGLE, includeConstants=False)
-            
             deflectionBc = deflectionBcs[0]
-            self.C2 = (deflectionBc.Value * self.E * self.I) - self.evaluateAt(deflectionBc.Location, BoundaryConditionTypes.DEFLECTION, includeConstants=False) - self.C1*deflectionBc.Location
 
+            c1 = (angleBc.Value - self.evaluateAt(angleBc.Location, BeamAnalysisTypes.ANGLE, False)) * (self.E * self.I)
+            self.C1 = c1
+            self.C2 = (deflectionBc.Value - self.evaluateAt(deflectionBc.Location, BeamAnalysisTypes.DEFLECTION, False)) * (self.E * self.I) - c1*deflectionBc.Location
+        
+        # elif 1 < len(angleBcs):
+            # TODO solve for multiple angle BCS
 
         elif 1 < len(deflectionBcs):
             # use first two deflection bcs
@@ -105,17 +108,22 @@ class Singularity(object):
         `NOTE` - to properly perform analysis, must call solve() before evaluating
         """
         val = 0
+        if len(self.AppliedLoads) == 0:
+            return val
+        
         for load in self.AppliedLoads:
             val += load.evaluateAt(x, beamAnalysisType)
         
-        if includeConstants:
-            if beamAnalysisType == BeamAnalysisTypes.ANGLE or beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
-                val += self.C1 * x
-            
-            if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
-                val += self.C2
-        
         if beamAnalysisType == BeamAnalysisTypes.ANGLE or beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            if includeConstants:
+                try:
+                    if beamAnalysisType == BeamAnalysisTypes.ANGLE:
+                        val += self.C1
+                    else:
+                        val += self.C1*x + self.C2
+                except Exception as e:
+                    raise Exception(f"unable to solve for singularity value when constants are not set.\n{e}")
+            
             val /= (self.E * self.I)
         
         return val
@@ -129,6 +137,7 @@ class Singularity(object):
 
         returns a string representation of the singularity function
         """
+        
         s = ""
         if len(self.AppliedLoads) == 0:
             return "no applied loads"

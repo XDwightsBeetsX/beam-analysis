@@ -2,10 +2,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from beam_analysis.Enums import BeamAnalysisTypes
+from beam_analysis.Enums import BeamAnalysisTypes, Units
 from beam_analysis.Singularity import Singularity
 from beam_analysis.AppliedLoad import DistributedLoad, PointLoad, Moment
 from beam_analysis.BoundaryCondition import BoundaryCondition
+from beam_analysis.Unit import Unit
 
 
 class Beam(object):
@@ -28,6 +29,10 @@ class Beam(object):
         self.SingularityXY = Singularity(length, e, i)
         self.SingularityXZ = Singularity(length, e, i)
         self.Tol = 1E-6
+        self.ShearUnits = Unit(Units.Shear, "[N]")
+        self.MomentUnits = Unit(Units.Bending, "[N-m]")
+        self.AngleUnits = Unit(Units.Angle, "[rad]")
+        self.DeflectionUnits = Unit(Units.Deflection, "[m]")
     
 
     def addDistributedLoad(self, start, stop, magnitude, angle):
@@ -145,38 +150,88 @@ class Beam(object):
             xzAngle.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.ANGLE))
             xzDeflection.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.DEFLECTION))
         
-        _fig, axs = plt.subplots(4, 2, sharex='col', sharey='row')
         
+        r = .5      # beam radius  # TODO make this editable via B.I
+        res = 36    # points per beam cross-section "slice"
+        step = (2*np.pi) / res
+        theta = 0
+        beam3d = [[], [], []]   # x, y, z
+        shear3d = [[], [], []]
+        bending3d = [[], [], []]
+        angle3d = [[], [], []]
+        deflection3d = [[], [], []]
+        for i in range(len(xVals)):
+            x = xVals[i]
+            for _step in range(res):
+                c = np.cos(theta)
+                s = np.sin(theta)
+
+                # use fewer points for beam
+                if i % 2 == 0:
+                    beam3d[0].append(x)
+                    beam3d[1].append(r * c)
+                    beam3d[2].append(r * s)
+
+                shear3d[0].append(x)
+                shear3d[1].append(xyShear[i] * c)
+                shear3d[2].append(xyShear[i] * s)
+
+                bending3d[0].append(x)
+                bending3d[1].append(xyBending[i] * c)
+                bending3d[2].append(xyBending[i] * s)
+
+                angle3d[0].append(x)
+                angle3d[1].append(xyAngle[i] * c)
+                angle3d[2].append(xyAngle[i] * s)
+                
+                deflection3d[0].append(x)
+                deflection3d[1].append(xyDeflection[i] * c)
+                deflection3d[2].append(xyDeflection[i] * s)
+
+                theta += step
+
+        _fig, axs = plt.subplots(4, 2, sharex='col', sharey='row')
+        beamStyle = 'k--'
+        shearStyle = 'b-'
+        bendingStyle = 'r-'
+        angleStyle = 'y-'
+        deflectionStyle = 'g-'
         # XY Plane
         axs[0, 0].set_title("XY Plane")
-        axs[0, 0].plot(xVals, beam2d, 'k-')
-        axs[0, 0].plot(xVals, xyShear)
-        axs[0, 0].set_ylabel("Shear")
+        axs[0, 0].plot(xVals, beam2d, beamStyle)
+        axs[0, 0].plot(xVals, xyShear, shearStyle)
+        axs[0, 0].set_ylabel(f"Shear {self.ShearUnits.Label}")
 
-        axs[1, 0].plot(xVals, beam2d, 'k-')
-        axs[1, 0].plot(xVals, xyBending)
-        axs[1, 0].set_ylabel("Bending")
+        axs[1, 0].plot(xVals, beam2d, beamStyle)
+        axs[1, 0].plot(xVals, xyBending, bendingStyle)
+        axs[1, 0].set_ylabel(f"Bending {self.MomentUnits.Label}")
 
-        axs[2, 0].plot(xVals, beam2d, 'k-')
-        axs[2, 0].plot(xVals, xyAngle)
-        axs[2, 0].set_ylabel("Angle")
+        axs[2, 0].plot(xVals, beam2d, beamStyle)
+        axs[2, 0].plot(xVals, xyAngle, angleStyle)
+        axs[2, 0].set_ylabel(f"Angle {self.AngleUnits.Label}")
 
-        axs[3, 0].plot(xVals, beam2d, 'k-')
-        axs[3, 0].plot(xVals, xyDeflection)
-        axs[3, 0].set_ylabel("Deflection")
+        axs[3, 0].plot(xVals, beam2d, beamStyle)
+        axs[3, 0].plot(xVals, xyDeflection, deflectionStyle)
+        axs[3, 0].set_ylabel(f"Deflection {self.DeflectionUnits.Label}")
 
         # XZ Plane
         axs[0, 1].set_title("XZ Plane")
-        axs[0, 1].plot(xVals, beam2d, 'k-')
-        axs[0, 1].plot(xVals, xzShear)
+        axs[0, 1].plot(xVals, beam2d, beamStyle)
+        axs[0, 1].plot(xVals, xzShear, shearStyle)
 
-        axs[1, 1].plot(xVals, beam2d, 'k-')
-        axs[1, 1].plot(xVals, xzBending)
+        axs[1, 1].plot(xVals, beam2d, beamStyle)
+        axs[1, 1].plot(xVals, xzBending, bendingStyle)
 
-        axs[2, 1].plot(xVals, beam2d, 'k-')
-        axs[2, 1].plot(xVals, xzAngle)
+        axs[2, 1].plot(xVals, beam2d, beamStyle)
+        axs[2, 1].plot(xVals, xzAngle, angleStyle)
 
-        axs[3, 1].plot(xVals, beam2d, 'k-')
-        axs[3, 1].plot(xVals, xzDeflection)
+        axs[3, 1].plot(xVals, beam2d, beamStyle)
+        axs[3, 1].plot(xVals, xzDeflection, deflectionStyle)
 
         plt.show()
+
+
+        _fig3d = plt.figure()
+        axs3d = _fig3d.gca(projection='3d')
+        axs3d.plot(beam3d[0], beam3d[1], beam3d[2], alpha=0.5)
+        # plt.show()

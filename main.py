@@ -19,9 +19,9 @@ if __name__ == "__main__":
     # I - Moment of Inertia I             #
     # L - Beam Length                     #
     # =================================== #
-    E = 20 * 10**9
+    E = 207 * 10**9
     I = 2 * 10**-8
-    L = 1
+    L = 1.0
 
     B = Beam(L, E, I)
 
@@ -37,9 +37,10 @@ if __name__ == "__main__":
     #         \ |                         #
     #          \|________ (0 - XY plane)  #
     # =================================== #
-    B.addPointLoad(0, 10/2, 0)
-    B.addPointLoad(L/2, -10, 0)
-    B.addPointLoad(L, 10/2, 0)
+    B.addPointLoad(0, 11, 0)
+    B.addPointLoad(L/2, -21, 0)
+    B.addPointLoad(L, 11, 0)
+    B.addDistributedLoad(0, L, -1, 0)
 
 
     # =================================== #
@@ -47,8 +48,8 @@ if __name__ == "__main__":
     # =================================== #
     # Use the loading angle convention    #
     # =================================== #
-    # B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0.0)
-    B.addBoundaryCondition(0.0, BoundaryConditionTypes.DEFLECTION, 0.0)
+    B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0)
+    # B.addBoundaryCondition(0, BoundaryConditionTypes.DEFLECTION, 0)
     B.addBoundaryCondition(L, BoundaryConditionTypes.DEFLECTION, 0.0)
 
 
