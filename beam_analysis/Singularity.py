@@ -86,8 +86,8 @@ class Singularity(object):
             deflectionBc1 = deflectionBcs[0]
             deflectionBc2 = deflectionBcs[1]
 
-            defBc1K = (deflectionBc1.Value * self.E * self.I) - self.evaluateAt(deflectionBc1.Location, BeamAnalysisTypes.DEFLECTION, includeConstants=False)
-            defBc2K = (deflectionBc2.Value * self.E * self.I) - self.evaluateAt(deflectionBc2.Location, BeamAnalysisTypes.DEFLECTION, includeConstants=False)
+            defBc1K = (deflectionBc1.Value - self.evaluateAt(deflectionBc1.Location, BeamAnalysisTypes.DEFLECTION, includeConstants=False)) * (self.E * self.I)
+            defBc2K = (deflectionBc2.Value - self.evaluateAt(deflectionBc2.Location, BeamAnalysisTypes.DEFLECTION, includeConstants=False)) * (self.E * self.I)
             
             c1 = (defBc1K - defBc2K) / (deflectionBc1.Location - deflectionBc2.Location)
             self.C1 = c1

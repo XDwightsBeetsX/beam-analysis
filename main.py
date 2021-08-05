@@ -48,8 +48,8 @@ if __name__ == "__main__":
     # =================================== #
     # Use the loading angle convention    #
     # =================================== #
-    B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0)
-    # B.addBoundaryCondition(0, BoundaryConditionTypes.DEFLECTION, 0)
+    # B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0)
+    B.addBoundaryCondition(0, BoundaryConditionTypes.DEFLECTION, 0)
     B.addBoundaryCondition(L, BoundaryConditionTypes.DEFLECTION, 0.0)
 
 
