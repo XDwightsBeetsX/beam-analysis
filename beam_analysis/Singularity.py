@@ -77,9 +77,6 @@ class Singularity(object):
             c1 = (angleBc.Value - self.evaluateAt(angleBc.Location, BeamAnalysisTypes.ANGLE, False)) * (self.E * self.I)
             self.C1 = c1
             self.C2 = (deflectionBc.Value - self.evaluateAt(deflectionBc.Location, BeamAnalysisTypes.DEFLECTION, False)) * (self.E * self.I) - c1*deflectionBc.Location
-        
-        # elif 1 < len(angleBcs):
-            # TODO solve for multiple angle BCS
 
         elif 1 < len(deflectionBcs):
             # use first two deflection bcs
@@ -140,7 +137,7 @@ class Singularity(object):
         
         s = ""
         if len(self.AppliedLoads) == 0:
-            return "no applied loads"
+            return s
         
         for i in range(len(self.AppliedLoads)):
             load = self.AppliedLoads[i]

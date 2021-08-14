@@ -7,6 +7,7 @@ from beam_analysis.Singularity import Singularity
 from beam_analysis.AppliedLoad import DistributedLoad, PointLoad, Moment
 from beam_analysis.BoundaryCondition import BoundaryCondition
 from beam_analysis.Unit import Unit
+from beam_analysis.utils import getAbsMax
 
 
 class Beam(object):
@@ -15,20 +16,25 @@ class Beam(object):
     
     Add loads and perform analysis on this instance.
     """
-    def __init__(self, length, e, i):
+    def __init__(self, l, e, i, unitsFrom="m", unitsTo="c"):
         """
-        `length` - Beam length
+        `l` - Beam length
 
         `e` - Young's Modulus
 
         `i` - Moment of Intertia
+
+        `unitsFrom / unitsTo` - "m(etric)" or "c(ustomary)" conversions available
         """
-        self.L = length
+        self.Tol = 1E-6
+
+        self.L = l
         self.E = e
         self.I = i
-        self.SingularityXY = Singularity(length, e, i)
-        self.SingularityXZ = Singularity(length, e, i)
-        self.Tol = 1E-6
+        
+        self.SingularityXY = Singularity(l, e, i)
+        self.SingularityXZ = Singularity(l, e, i)
+        
         self.ShearUnits = Unit(Units.Shear, "[N]")
         self.MomentUnits = Unit(Units.Bending, "[N-m]")
         self.AngleUnits = Unit(Units.Angle, "[rad]")
@@ -119,26 +125,41 @@ class Beam(object):
         """
         `n` - optional number of data points to run the analysis, default is 10^3
         """
+        # =================================== #
+        # = Solve for Singularity Constants = *
+        # =================================== #
+        pre = "[BEAM ANALYSIS] - "
         self.SingularityXY.solve()
+        xySingularities = [
+            self.SingularityXY.getString(BeamAnalysisTypes.SHEAR),
+            self.SingularityXY.getString(BeamAnalysisTypes.BENDING),
+            self.SingularityXY.getString(BeamAnalysisTypes.ANGLE),
+            self.SingularityXY.getString(BeamAnalysisTypes.DEFLECTION)
+        ]
+
         self.SingularityXZ.solve()
+        xzSingularities = [
+            self.SingularityXZ.getString(BeamAnalysisTypes.SHEAR),
+            self.SingularityXZ.getString(BeamAnalysisTypes.BENDING),
+            self.SingularityXZ.getString(BeamAnalysisTypes.ANGLE),
+            self.SingularityXZ.getString(BeamAnalysisTypes.DEFLECTION)
+        ]
+
+        hasXY = not all(s == "" for s in xySingularities)
+        hasXZ = not all(s == "" for s in xzSingularities)
+
+        if not (hasXY or hasXZ): 
+            quit()
         
-        print("Singularity functions in XY plane:")
-        print(self.SingularityXY.getString(BeamAnalysisTypes.SHEAR))
-        print(self.SingularityXY.getString(BeamAnalysisTypes.BENDING))
-        print(self.SingularityXY.getString(BeamAnalysisTypes.ANGLE))
-        print(self.SingularityXY.getString(BeamAnalysisTypes.DEFLECTION))
 
-        print("\nSingularity functions in XZ plane:")
-        print(self.SingularityXZ.getString(BeamAnalysisTypes.SHEAR))
-        print(self.SingularityXZ.getString(BeamAnalysisTypes.BENDING))
-        print(self.SingularityXZ.getString(BeamAnalysisTypes.ANGLE))
-        print(self.SingularityXZ.getString(BeamAnalysisTypes.DEFLECTION))
-
+        # =================================== #
+        # ========== Beam Results =========== #
+        # =================================== #
+        # independent vars
         xVals = np.linspace(0, self.L, n)
-        beam2d = [0] * n
+        # dependent decl
         xyShear, xyBending, xyAngle, xyDeflection = [], [], [], []
         xzShear, xzBending, xzAngle, xzDeflection = [], [], [], []
-
         for x in xVals:
             xyShear.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.SHEAR))
             xyBending.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.BENDING))
@@ -150,88 +171,128 @@ class Beam(object):
             xzAngle.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.ANGLE))
             xzDeflection.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.DEFLECTION))
         
+
+        # =================================== #
+        # ========= Analysis Prompt ========= #
+        # =================================== #
+        sep = f"# {'='*len(xySingularities[3])} #"
+        solving = "[SOLVING] - "
+        print(sep)
+        print(f"{pre}{solving}Solved for xy angle constant C1 = {self.SingularityXY.C1}")
+        print(f"{pre}{solving}Solved for xy deflection constant C2 = {self.SingularityXY.C2}")
+
+        print(f"{pre}{solving}Solved for xz angle constant C1 = {self.SingularityXZ.C1}")
+        print(f"{pre}{solving}Solved for xz deflection constant C2 = {self.SingularityXZ.C2}")
         
-        r = .5      # beam radius  # TODO make this editable via B.I
-        res = 36    # points per beam cross-section "slice"
-        step = (2*np.pi) / res
-        theta = 0
-        beam3d = [[], [], []]   # x, y, z
-        shear3d = [[], [], []]
-        bending3d = [[], [], []]
-        angle3d = [[], [], []]
-        deflection3d = [[], [], []]
-        for i in range(len(xVals)):
-            x = xVals[i]
-            for _step in range(res):
-                c = np.cos(theta)
-                s = np.sin(theta)
 
-                # use fewer points for beam
-                if i % 2 == 0:
-                    beam3d[0].append(x)
-                    beam3d[1].append(r * c)
-                    beam3d[2].append(r * s)
+        # =================================== #
+        # ====== Singularity Functions ====== #
+        # =================================== #
+        if hasXY:
+            print(sep)
+            print(f"{pre}Singularity functions in XY plane:")
+            for s in xySingularities:
+                print(s)
+        if hasXZ:
+            print(sep)
+            print(f"{pre}Singularity functions in XZ plane:")
+            for s in xzSingularities:
+                print(s)
+        print(sep)
 
-                shear3d[0].append(x)
-                shear3d[1].append(xyShear[i] * c)
-                shear3d[2].append(xyShear[i] * s)
 
-                bending3d[0].append(x)
-                bending3d[1].append(xyBending[i] * c)
-                bending3d[2].append(xyBending[i] * s)
+        # =================================== #
+        # ========= Analysis Report ========= #
+        # =================================== #
+        if hasXY:
+            print("Report in XY:")
+            print(f"Maximum Shear in XY plane: {getAbsMax(xyShear)} {self.ShearUnits}")
+            print(f"Maximum Moment in XY plane: {getAbsMax(xyBending)} {self.MomentUnits}")
+            print(f"Maximum Angle in XY plane: {getAbsMax(xyAngle)} {self.AngleUnits}")
+            print(f"Maximum Deflection in XY plane: {getAbsMax(xyDeflection)} {self.DeflectionUnits}")
+        if hasXZ:
+            print("Report in XZ:")
+            print(f"Maximum Shear in XZ plane: {getAbsMax(xzShear)} {self.ShearUnits}")
+            print(f"Maximum Moment in XZ plane: {getAbsMax(xzBending)} {self.MomentUnits}")
+            print(f"Maximum Angle in XZ plane: {getAbsMax(xzAngle)} {self.AngleUnits}")
+            print(f"Maximum Deflection in XZ plane: {getAbsMax(xzDeflection)} {self.DeflectionUnits}")
+        print(sep)
+        
 
-                angle3d[0].append(x)
-                angle3d[1].append(xyAngle[i] * c)
-                angle3d[2].append(xyAngle[i] * s)
-                
-                deflection3d[0].append(x)
-                deflection3d[1].append(xyDeflection[i] * c)
-                deflection3d[2].append(xyDeflection[i] * s)
+        # =================================== #
+        # ============ 2D Plots ============= #
+        # =================================== #
+        fig, axs = plt.subplots(4, 2, sharex='col', sharey='row')
+        horizontal = [0] * n
 
-                theta += step
-
-        _fig, axs = plt.subplots(4, 2, sharex='col', sharey='row')
+        # plot styles
         beamStyle = 'k--'
         shearStyle = 'b-'
         bendingStyle = 'r-'
         angleStyle = 'y-'
         deflectionStyle = 'g-'
-        # XY Plane
-        axs[0, 0].set_title("XY Plane")
-        axs[0, 0].plot(xVals, beam2d, beamStyle)
-        axs[0, 0].plot(xVals, xyShear, shearStyle)
-        axs[0, 0].set_ylabel(f"Shear {self.ShearUnits.Label}")
 
-        axs[1, 0].plot(xVals, beam2d, beamStyle)
-        axs[1, 0].plot(xVals, xyBending, bendingStyle)
-        axs[1, 0].set_ylabel(f"Bending {self.MomentUnits.Label}")
+        if hasXY:
+            axs[0, 0].set_title("XY Plane")
+            axs[0, 0].plot(xVals, horizontal, beamStyle)
+            axs[0, 0].plot(xVals, xyShear, shearStyle)
+            axs[0, 0].set_ylabel(f"Shear {self.ShearUnits.Label}")
 
-        axs[2, 0].plot(xVals, beam2d, beamStyle)
-        axs[2, 0].plot(xVals, xyAngle, angleStyle)
-        axs[2, 0].set_ylabel(f"Angle {self.AngleUnits.Label}")
+            axs[1, 0].plot(xVals, horizontal, beamStyle)
+            axs[1, 0].plot(xVals, xyBending, bendingStyle)
+            axs[1, 0].set_ylabel(f"Bending {self.MomentUnits.Label}")
 
-        axs[3, 0].plot(xVals, beam2d, beamStyle)
-        axs[3, 0].plot(xVals, xyDeflection, deflectionStyle)
-        axs[3, 0].set_ylabel(f"Deflection {self.DeflectionUnits.Label}")
+            axs[2, 0].plot(xVals, horizontal, beamStyle)
+            axs[2, 0].plot(xVals, xyAngle, angleStyle)
+            axs[2, 0].set_ylabel(f"Angle {self.AngleUnits.Label}")
 
-        # XZ Plane
-        axs[0, 1].set_title("XZ Plane")
-        axs[0, 1].plot(xVals, beam2d, beamStyle)
-        axs[0, 1].plot(xVals, xzShear, shearStyle)
+            axs[3, 0].plot(xVals, horizontal, beamStyle)
+            axs[3, 0].plot(xVals, xyDeflection, deflectionStyle)
+            axs[3, 0].set_ylabel(f"Deflection {self.DeflectionUnits.Label}")
+        
+        if hasXZ:
+            axs[0, 1].set_title("XZ Plane")
+            axs[0, 1].plot(xVals, horizontal, beamStyle)
+            axs[0, 1].plot(xVals, xzShear, shearStyle)
 
-        axs[1, 1].plot(xVals, beam2d, beamStyle)
-        axs[1, 1].plot(xVals, xzBending, bendingStyle)
+            axs[1, 1].plot(xVals, horizontal, beamStyle)
+            axs[1, 1].plot(xVals, xzBending, bendingStyle)
 
-        axs[2, 1].plot(xVals, beam2d, beamStyle)
-        axs[2, 1].plot(xVals, xzAngle, angleStyle)
+            axs[2, 1].plot(xVals, horizontal, beamStyle)
+            axs[2, 1].plot(xVals, xzAngle, angleStyle)
 
-        axs[3, 1].plot(xVals, beam2d, beamStyle)
-        axs[3, 1].plot(xVals, xzDeflection, deflectionStyle)
+            axs[3, 1].plot(xVals, horizontal, beamStyle)
+            axs[3, 1].plot(xVals, xzDeflection, deflectionStyle)
 
+        fig.tight_layout()
         plt.show()
 
 
-        _fig3d = plt.figure()
-        axs3d = _fig3d.gca(projection='3d')
-        axs3d.plot(beam3d[0], beam3d[1], beam3d[2], alpha=0.5)
-        # plt.show()
+        # =================================== #
+        # ============ 3D Plot ============== #
+        # =================================== #
+        res = 8    # angles per beam cross-section "slice"
+        angles = np.linspace(0, np.pi, res)
+        beam3d = [xVals, xyDeflection, xzDeflection]
+        shear3d, bending3d = [], []
+        
+        # for theta in angles:
+            # for i_x in range(n):
+                # shear3d.append([xVals[i], xyShear[i]*np.sin(t) + xzShear[i]*np.sin(t), xyShear[i]*np.cos(t) + xzShear[i]*np.cos(t)])
+                # bending3d.append([xVals[i], xyBending[i]*np.sin(t) + xyBending[i]*np.sin(t), xyBending[i]*np.cos(t) + xyBending[i]*np.cos(t)])
+           
+                
+        # Plot lines in 3d
+        # convention is that y is vertical in 2d and z is vertical in 3d, so swap to keep consistent feel across both
+        fig3d = plt.figure()
+        axs3d = fig3d.gca(projection='3d', box_aspect=(1, 1, 1))
+        
+        axs3d.plot(xVals, horizontal, horizontal, 'k--')
+        axs3d.plot(beam3d[0], beam3d[2], beam3d[1], 'k--', alpha=0.5)
+        
+        # for i_theta in range(res):  
+            # axs3d.plot(shear3d[0], shear3d[1], shear3d[2], 'b-')
+            # axs3d.plot(bending3d[0], bending3d[1], bending3d[2], 'r-')
+        
+        fig3d.tight_layout()
+        plt.show()
