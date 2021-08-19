@@ -1,6 +1,4 @@
 
-from beam_analysis.Enums import BoundaryConditionTypes
-
 
 class BoundaryCondition(object):
     def __init__(self, location, type, value):

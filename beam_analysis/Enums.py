@@ -1,6 +1,4 @@
-
 from enum import Enum
-
 
 
 class Units(Enum):
@@ -32,3 +30,9 @@ class BeamAnalysisTypes(Enum):
 class BoundaryConditionTypes(Enum):
     ANGLE = 1
     DEFLECTION = 2
+
+
+class CrossSectionTypes(Enum):
+    RECT = 1
+    CIRC = 2
+    I = 3  # TODO

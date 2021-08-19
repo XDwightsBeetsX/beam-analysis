@@ -1,6 +1,3 @@
-"""
-Utility functions for beam-analysis
-"""
 
 
 def getAbsMax(list):

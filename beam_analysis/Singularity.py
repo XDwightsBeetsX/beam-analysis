@@ -1,4 +1,3 @@
-
 from beam_analysis.AppliedLoad import DistributedLoad
 from beam_analysis.Enums import AppliedLoadTypes, BeamAnalysisTypes, BoundaryConditionTypes
 

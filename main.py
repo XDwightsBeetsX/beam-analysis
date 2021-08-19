@@ -8,7 +8,8 @@ BEAM-ANALYSIS
 """
 
 from beam_analysis.Beam import Beam
-from beam_analysis.Enums import BoundaryConditionTypes
+from beam_analysis.Enums import BoundaryConditionTypes, CrossSectionTypes
+from beam_analysis.CrossSection import CrossSection
 
 
 if __name__ == "__main__":
@@ -20,10 +21,9 @@ if __name__ == "__main__":
     # L - Beam Length                     #
     # =================================== #
     E = 207 * 10**9
-    I = 2 * 10**-8
     L = 1.0
-
-    B = Beam(L, E, I)
+    CS = CrossSection(CrossSectionTypes.CIRC, [.01])
+    B = Beam(L, E, crossSection=CS)
 
 
     # =================================== #

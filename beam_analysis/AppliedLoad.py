@@ -1,4 +1,3 @@
-
 from beam_analysis.Enums import AppliedLoadTypes, BeamAnalysisTypes
 
 
