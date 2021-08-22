@@ -1,4 +1,15 @@
-from beam_analysis.Enums import AppliedLoadTypes, BeamAnalysisTypes
+from enum import Enum
+
+from beam_analysis.BeamAnalysisTypes import BeamAnalysisTypes
+
+
+class AppliedLoadTypes(Enum):
+    """
+    The assigned values here matter and are used in Singularity analysis
+    """
+    DISTRIBUTED_LOAD = 1
+    POINT_LOAD = 2
+    MOMENT = 3
 
 
 class AppliedLoad(object):

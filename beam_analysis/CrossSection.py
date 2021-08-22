@@ -1,6 +1,11 @@
 import numpy as np
+from enum import Enum
 
-from beam_analysis.Enums import CrossSectionTypes
+
+class CrossSectionTypes(Enum):
+    RECT = 1
+    CIRC = 2
+    I = 3
 
 
 class CrossSection(object):
@@ -54,14 +59,16 @@ class CrossSection(object):
         """
         x, y, z = [], [], []
         if self.CrossSectionType == CrossSectionTypes.RECT:
+            # TODO
             pass
         if self.CrossSectionType == CrossSectionTypes.CIRC:
             r = self.Dims[0]
             ith = 2 * np.pi / n  # radian fraction
-            for i in range(0, n+1):
+            for i in range(0, n):
                 x.append(xOffset)
                 y.append(zOffset + np.cos(ith * i) * r)
                 z.append(yOffset + np.sin(ith * i) * r)
             return x, y, z
         if self.CrossSectionType == CrossSectionTypes.I:
+            # TODO
             pass

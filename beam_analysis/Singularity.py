@@ -1,5 +1,6 @@
-from beam_analysis.AppliedLoad import DistributedLoad
-from beam_analysis.Enums import AppliedLoadTypes, BeamAnalysisTypes, BoundaryConditionTypes
+from beam_analysis.AppliedLoad import AppliedLoadTypes, DistributedLoad
+from beam_analysis.BeamAnalysisTypes import BeamAnalysisTypes
+from beam_analysis.BoundaryCondition import BoundaryConditionTypes
 
 
 class Singularity(object):
@@ -133,14 +134,14 @@ class Singularity(object):
 
         returns a string representation of the singularity function
         """
-        
+        equiv0 = 1e-14
         s = ""
         if len(self.AppliedLoads) == 0:
             return s
         
         for i in range(len(self.AppliedLoads)):
             load = self.AppliedLoads[i]
-            if (load.Magnitude == 0):
+            if (abs(load.Magnitude) < equiv0):
                 continue
             if (0 < i and 0 <= load.Magnitude):
                 s += " + "

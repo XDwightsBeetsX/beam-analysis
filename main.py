@@ -8,8 +8,8 @@ BEAM-ANALYSIS
 """
 
 from beam_analysis.Beam import Beam
-from beam_analysis.Enums import BoundaryConditionTypes, CrossSectionTypes
-from beam_analysis.CrossSection import CrossSection
+from beam_analysis.BoundaryCondition import BoundaryConditionTypes
+from beam_analysis.CrossSection import CrossSection, CrossSectionTypes
 
 
 if __name__ == "__main__":
@@ -37,11 +37,14 @@ if __name__ == "__main__":
     #         \ |                         #
     #          \|________ (0 - XY plane)  #
     # =================================== #
-    B.addPointLoad(0, 11, 0)
-    B.addPointLoad(L/2, -21, 0)
-    B.addPointLoad(L, 11, 0)
-    B.addDistributedLoad(0, L, -1, 0)
+    B.addPointLoad(0, 10, 0)
+    B.addPointLoad(0, 10, 90)
 
+    B.addPointLoad(L/2, -20, 0)
+    B.addPointLoad(L/2, -20, 90)
+
+    B.addPointLoad(L, 10, 0)
+    B.addPointLoad(L, 10, 90)
 
     # =================================== #
     #    3. Input Boundary Conditions     #

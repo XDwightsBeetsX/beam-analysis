@@ -1,3 +1,9 @@
+from enum import Enum
+
+
+class BoundaryConditionTypes(Enum):
+    ANGLE = 1
+    DEFLECTION = 2
 
 
 class BoundaryCondition(object):
