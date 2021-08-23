@@ -1,16 +1,20 @@
+from enum import Enum
 
 
-from beam_analysis.utils import DEFLECTION
+class BoundaryConditionTypes(Enum):
+    ANGLE = 1
+    DEFLECTION = 2
 
 
 class BoundaryCondition(object):
-    """
-    Stores a Boundary Condition
-    location  
-    bc_type  
-    bc_value
-    """
-    def __init__(self, loc, bc_type=DEFLECTION, bc_value=0.0):
-        self.Location = loc
-        self.Bc_type = bc_type
-        self.Bc_value = bc_value
+    def __init__(self, location, type, value):
+        """
+        `location` - the distance along the beam to the boundary condition
+
+        `type` - angle, deflection
+
+        `value` - the value of the boundary condition, typically 0
+        """
+        self.Location = location
+        self.Type = type
+        self.Value = value

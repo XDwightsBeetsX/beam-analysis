@@ -1,3 +1,6 @@
+"""
+TODO this is not in use by the package but may be incoorperated later...
+"""
 
 PREFIX_STRESS_ELEMENT = "[Stress Element] - "
 

@@ -1,55 +1,132 @@
-"""
-AppliedLoad class used in Beam and Singularity
-"""
+from enum import Enum
 
-import numpy as np
+from beam_analysis.BeamAnalysisTypes import BeamAnalysisTypes
 
-from beam_analysis.utils import MOMENT, POINT_LOAD, DISTRIBUTED_LOAD, ANGLE_BC
+
+class AppliedLoadTypes(Enum):
+    """
+    The assigned values here matter and are used in Singularity analysis
+    """
+    DISTRIBUTED_LOAD = 1
+    POINT_LOAD = 2
+    MOMENT = 3
 
 
 class AppliedLoad(object):
-    """
-    Effectively a Singularity Function term.  
-    Stores information about an applied load:
-    - Start  
-    - Coefficient (Magnitude)  
-    - Origin  
-    - Power (Determined from Origin)
-    """
-    def __init__(self, start, coefficient, origin):
+    def __init__(self, magnitude, appliedLoadType):
+        self.Magnitude = magnitude
+        self.AppliedLoadType = appliedLoadType
+        
+    
+    def evaluateAt(self, x, beamAnalysisType):
+        pass
+    
+    
+    def getString(self, beamAnalysisType):
+        pass
+
+
+class DistributedLoad(AppliedLoad):
+    def __init__(self, start, stop, magnitude):
+        super().__init__(magnitude, AppliedLoadTypes.DISTRIBUTED_LOAD)
         self.Start = start
-        self.Coefficient = coefficient
-        self.Origin = origin
-        if origin == ANGLE_BC:
-            self.Power = -2
-        elif origin == MOMENT:
-            self.Power = -1
-        elif origin == POINT_LOAD:
-            self.Power = 0
-        elif origin == DISTRIBUTED_LOAD:
-            self.Power = 1
+        self.Stop = stop
     
-    def getString(self, powerModifier=0):
-        effPower = self.Power + powerModifier
-        if effPower < 0:
-            return "0"
-        elif effPower == 0:
-            return f"{self.Coefficient}"
-        elif effPower == 1:
-            return f"{self.Coefficient}<x-{self.Start}>"
-        else:
-            return f"({self.Coefficient}/{np.math.factorial(effPower)})<x-{self.Start}>^{effPower}"
+
+    def evaluateAt(self, x, beamAnalysisType):
+        if not (self.Start <= x):
+            return 0.0
+        if beamAnalysisType == BeamAnalysisTypes.SHEAR:
+            return self.Magnitude * (x - self.Start)
+        if beamAnalysisType == BeamAnalysisTypes.BENDING:
+            return (self.Magnitude / 2) * (x - self.Start) ** 2
+        if beamAnalysisType == BeamAnalysisTypes.ANGLE:
+            return (self.Magnitude / 6) * (x - self.Start) ** 3
+        if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            return (self.Magnitude / 24) * (x - self.Start) ** 4
     
-    def evaluate(self, point, powerModifier):
-        if point < self.Start:
-            return 0
-        else:
-            effPower = self.Power + powerModifier
-            if effPower < 0:
-                return 0
-            elif effPower == 0:
-                return self.Coefficient
-            elif effPower == 1:
-                return self.Coefficient * (point - self.Start)
-            else:
-                return (self.Coefficient / np.math.factorial(effPower)) * (point - self.Start)**(effPower)
+
+    def getString(self, beamAnalysisType):
+        mag = abs(self.Magnitude)
+        if beamAnalysisType == BeamAnalysisTypes.SHEAR:
+            if (self.Start == 0):
+                return f"{mag}x"
+            return f"{mag}<x - {self.Start}>^1"
+        if beamAnalysisType == BeamAnalysisTypes.BENDING:
+            if (self.Start == 0):
+                return f"({mag} / 2)x^2"
+            return f"({mag} / 2)<x - {self.Start}>^2"
+        if beamAnalysisType == BeamAnalysisTypes.ANGLE:
+            if (self.Start == 0):
+                return f"({mag} / 6)x^3"
+            return f"({mag} / 6)<x - {self.Start}>^3"
+        if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            if (self.Start == 0):
+                return f"({mag} / 24)x^4"
+            return f"({mag} / 24)<x - {self.Start}>^4"
+
+
+class PointLoad(AppliedLoad):
+    def __init__(self, location, magnitude):
+        super().__init__(magnitude, AppliedLoadTypes.POINT_LOAD)
+        self.Location = location
+    
+
+    def evaluateAt(self, x, beamAnalysisType):
+        if not (self.Location <= x):
+            return 0.0
+        if beamAnalysisType == BeamAnalysisTypes.SHEAR:
+            return self.Magnitude
+        if beamAnalysisType == BeamAnalysisTypes.BENDING:
+            return self.Magnitude * (x - self.Location)
+        if beamAnalysisType == BeamAnalysisTypes.ANGLE:
+            return (self.Magnitude / 2) * (x - self.Location) ** 2
+        if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            return (self.Magnitude / 6) * (x - self.Location) ** 3
+    
+
+    def getString(self, beamAnalysisType):
+        mag = abs(self.Magnitude)        
+        if beamAnalysisType == BeamAnalysisTypes.SHEAR:
+            if (self.Location == 0):
+                return f"{mag}"
+            return f"{mag}<x - {self.Location}>^0"
+        if beamAnalysisType == BeamAnalysisTypes.BENDING:
+            return f"{mag}<x - {self.Location}>^1"
+        if beamAnalysisType == BeamAnalysisTypes.ANGLE:
+            return f"({mag} / 2)<x - {self.Location}>^2"
+        if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            return f"({mag} / 6)<x - {self.Location}>^3"
+
+
+class Moment(AppliedLoad):
+    def __init__(self, location, magnitude):
+        super().__init__(magnitude, AppliedLoadTypes.MOMENT)
+        self.Location = location
+    
+
+    def evaluateAt(self, x, beamAnalysisType):
+        if not (x <= self.Location):
+            return 0.0
+        if beamAnalysisType == BeamAnalysisTypes.SHEAR:
+            return 0.0
+        if beamAnalysisType == BeamAnalysisTypes.BENDING:
+            return self.Magnitude
+        if beamAnalysisType == BeamAnalysisTypes.ANGLE:
+            return self.Magnitude * (x - self.Location)
+        if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            return (self.Magnitude / 2) * (x - self.Location) ** 2
+    
+
+    def getString(self, beamAnalysisType):
+        mag = abs(self.Magnitude)
+        if beamAnalysisType == BeamAnalysisTypes.SHEAR:
+            return f"0.0"
+        if beamAnalysisType == BeamAnalysisTypes.BENDING:
+            if (self.Location == 0):
+                return f"{mag}"
+            return f"{mag}<x - {self.Location}>^0"
+        if beamAnalysisType == BeamAnalysisTypes.ANGLE:
+            return f"{mag}<x - {self.Location}>^1"
+        if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
+            return f"({mag} / 2)<x - {self.Location}>^2"
