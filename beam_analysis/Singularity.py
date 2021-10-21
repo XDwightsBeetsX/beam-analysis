@@ -4,23 +4,21 @@ from beam_analysis.BoundaryCondition import BoundaryConditionTypes
 
 
 class Singularity(object):
-    def __init__(self, length, e, i, appliedLoads=[], boundaryConditions=[]):
+    def __init__(self, length, e, i):
         """
         `length` - Beam length
 
         `e` - Young's Modulus
 
         `i` - Moment of Intertia
-
-        `appliedLoads` - (optional) a list of AppliedLoads in this Singularity Eq'n
-
-        `boundaryConditions` - (optional) a list of BoundaryConditions in this Singularity Eq'n
         """
         self.L = length
         self.E = e
         self.I = i
-        self.AppliedLoads = appliedLoads
-        self.BoundaryConditions = boundaryConditions
+
+        # defaults
+        self.AppliedLoads = []
+        self.BoundaryConditions = []
         self.C1 = 0
         self.C2 = 0
     
@@ -29,12 +27,12 @@ class Singularity(object):
         """
         `appliedLoad` - distributed load, point load, moment
         """
+        self.AppliedLoads.append(appliedLoad)
+
         # add counteracting distributed load to offset beyond a point of interest
         if type(appliedLoad) is AppliedLoadTypes.DISTRIBUTED_LOAD:
             counterLoad = DistributedLoad(appliedLoad.Stop, self.L, -appliedLoad.Magnitude)
             self.AppliedLoads.append(counterLoad)
-        
-        self.AppliedLoads.append(appliedLoad)
 
 
     def addBoundaryCondition(self, boundaryCondition):
