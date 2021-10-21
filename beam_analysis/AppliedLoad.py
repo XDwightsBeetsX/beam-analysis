@@ -41,9 +41,9 @@ class DistributedLoad(AppliedLoad):
         if beamAnalysisType == BeamAnalysisTypes.BENDING:
             return (self.Magnitude / 2) * (x - self.Start) ** 2
         if beamAnalysisType == BeamAnalysisTypes.ANGLE:
-            return (self.Magnitude / 6) * (x - self.Start) ** 3
+            return -(self.Magnitude / 6) * (x - self.Start) ** 3
         if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
-            return (self.Magnitude / 24) * (x - self.Start) ** 4
+            return -(self.Magnitude / 24) * (x - self.Start) ** 4
     
 
     def getString(self, beamAnalysisType):
@@ -80,9 +80,9 @@ class PointLoad(AppliedLoad):
         if beamAnalysisType == BeamAnalysisTypes.BENDING:
             return self.Magnitude * (x - self.Location)
         if beamAnalysisType == BeamAnalysisTypes.ANGLE:
-            return (self.Magnitude / 2) * (x - self.Location) ** 2
+            return -(self.Magnitude / 2) * (x - self.Location) ** 2
         if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
-            return (self.Magnitude / 6) * (x - self.Location) ** 3
+            return -(self.Magnitude / 6) * (x - self.Location) ** 3
     
 
     def getString(self, beamAnalysisType):
@@ -113,9 +113,9 @@ class Moment(AppliedLoad):
         if beamAnalysisType == BeamAnalysisTypes.BENDING:
             return self.Magnitude
         if beamAnalysisType == BeamAnalysisTypes.ANGLE:
-            return self.Magnitude * (x - self.Location)
+            return -self.Magnitude * (x - self.Location)
         if beamAnalysisType == BeamAnalysisTypes.DEFLECTION:
-            return (self.Magnitude / 2) * (x - self.Location) ** 2
+            return -(self.Magnitude / 2) * (x - self.Location) ** 2
     
 
     def getString(self, beamAnalysisType):

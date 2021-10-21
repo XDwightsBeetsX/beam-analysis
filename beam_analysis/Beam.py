@@ -267,27 +267,36 @@ class Beam(object):
         |   Angle    |   Angle    |    |/__________   |
         | Deflection | Deflection |   /|              |
         """
-        Fig = plt.figure(figsize=(w, h))
-        Fig.suptitle("Beam Analysis Results")
-        figs = Fig.subfigures(1, 2)
+        # Main Fig -> 1x2 figs (2D/3D)
+        # Left Fig -> 2x4 figs (XY/XZ plots)
+        # Right Fig -> 1x1 fig (3D plot)
+        fig_main = plt.figure(figsize=(w, h))
+        fig_main.suptitle("Beam Analysis Results")
+        
+        fig_left, fig_right = fig_main.subfigures(nrows=1, ncols=2)
+        fig_left.suptitle("2D")
+        fig_right.suptitle("3D")
 
-        # plotting vars
+        # =================================== #
+        # ============ 2D Plots ============= #
+        # =================================== #
+        ax2d = fig_left.subplots(4, 2, sharex='col', sharey='row')
+        ax2d[0, 0].set_title("XY Plane")
+        ax2d[0, 1].set_title("XZ Plane")
+
+        # std plot params
         n = len(xVals)
         axis0 = [0]*n
-        
+
         # plot styles
         beamStyle = 'k--'
         shearStyle = 'b-'
         bendingStyle = 'r-'
         angleStyle = 'y-'
         deflectionStyle = 'g-'
-
-        # =================================== #
-        # ============ 2D Plots ============= #
-        # =================================== #
-        fig2d = figs[0]
-        ax2d = fig2d.subplots(4, 2, sharex='col', sharey='row')
-        ax2d[0, 0].set_title("XY Plane")
+        
+        # plot Shear, Bending, Angle, and Deflection in 2D
+        # XY on left, XZ on right
         ax2d[0, 0].set_ylabel(f"Shear {self.ShearUnits.Label}")
         ax2d[0, 0].plot(xVals, axis0, beamStyle)
         ax2d[0, 0].plot(xVals, xyParams[0], shearStyle)
@@ -303,8 +312,7 @@ class Beam(object):
         ax2d[3, 0].set_ylabel(f"Deflection {self.DeflectionUnits.Label}")
         ax2d[3, 0].plot(xVals, axis0, beamStyle)
         ax2d[3, 0].plot(xVals, xyParams[3], deflectionStyle)
-    
-        ax2d[0, 1].set_title("XZ Plane")
+
         ax2d[0, 1].plot(xVals, axis0, beamStyle)
         ax2d[0, 1].plot(xVals, xzParams[0], shearStyle)
 
@@ -316,20 +324,17 @@ class Beam(object):
 
         ax2d[3, 1].plot(xVals, axis0, beamStyle)
         ax2d[3, 1].plot(xVals, xzParams[3], deflectionStyle)
-        
-        fig2d.align_ylabels()
+
+        fig_left.align_ylabels()
 
         
         # =================================== #
         # ============ 3D Plot ============== #
         # =================================== #
-        fig3d = figs[1]
-        ax3d = fig3d.add_subplot(111, projection='3d')
-        # ax3d.set_aspect('equal')  # not yet implemented by matplotlib
+        ax3d = fig_right.add_subplot(111, projection='3d')
 
         # convention is that y is vertical in 2d and z is vertical in 3d, 
         # so swap to keep consistent feel across both
-        fig3d.suptitle("3D")
         ax3d.set_xlabel("X")
         ax3d.set_ylabel("Z")
         ax3d.set_zlabel("Y")
