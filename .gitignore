@@ -1,10 +1,11 @@
 # Dist and Build for packaging
-.dist
-.build
-.egg-info
+*.dist
+*.build
+*.egg-info
 
 # Editors
-.vscode
+*.vscode
 
 # Caches
 __pycache__
+.pytest_cache

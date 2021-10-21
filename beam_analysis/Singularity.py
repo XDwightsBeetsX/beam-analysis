@@ -19,17 +19,8 @@ class Singularity(object):
         self.L = length
         self.E = e
         self.I = i
-
-        if len(appliedLoads) > 0:
-            self.AppliedLoads = appliedLoads
-        else:
-            self.AppliedLoads = []
-
-        if len(boundaryConditions) > 0:
-            self.BoundaryConditions = boundaryConditions
-        else:
-            self.BoundaryConditions = []
-
+        self.AppliedLoads = appliedLoads
+        self.BoundaryConditions = boundaryConditions
         self.C1 = 0
         self.C2 = 0
     
