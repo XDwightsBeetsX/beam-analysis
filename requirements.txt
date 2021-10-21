@@ -1,12 +1,7 @@
-# Parsed in setup.py to read packages
-# Lines should either start with '#' or have a package name
 # Required packages
+enum
 numpy
 matplotlib
 
 # Testing
 pytest
-
-# Deployment
-twine
-wheel

@@ -1,189 +1,377 @@
-"""
-Primary file for beam_analysis
-"""
-
 import numpy as np
 from matplotlib import pyplot as plt
 
+from beam_analysis.BeamAnalysisTypes import BeamAnalysisTypes
 from beam_analysis.Singularity import Singularity
+from beam_analysis.AppliedLoad import DistributedLoad, PointLoad, Moment
 from beam_analysis.BoundaryCondition import BoundaryCondition
-from beam_analysis.AppliedLoad import AppliedLoad
-from beam_analysis.PointValuePair import PointValuePair
-from beam_analysis.utils import PREFIX_BEAM, DISTRIBUTED_LOAD, POINT_LOAD, SHEAR, MOMENT, ANGLE, DEFLECTION,\
-                    CONVERSION_D_TO_SI, CONVERSION_F_TO_SI, CONVERSION_M_TO_SI
+from beam_analysis.Unit import Unit, UnitTypes
+from beam_analysis.CrossSection import CrossSection, CrossSectionTypes
+import beam_analysis.utils as utils
 
 
 class Beam(object):
     """
-    Has material properties E, I, L as well as a Singularity function for the beam
+    Primary class for the beam_analysis package.
+    
+    Add loads and perform analysis on this instance.
     """
-    def __init__(self, l, e, i):
+    def __init__(self, l, e, i=None, crossSection=None):
+        """
+        `l` - Beam length
+
+        `e` - Young's Modulus
+
+        `i` - Moment of Intertia. Enter either this or give a crossSection.
+
+        `crossSection` - a CrossSectionObject. This is preferred over a Moment of Inertia value (gives plot).
+        """
+        self.Tol = 1E-6
         self.L = l
         self.E = e
-        self.I = i
-        self.Singularity = Singularity(l, e, i)
-    
-    def showParams(self):
-        print("\n{:*^50}".format(" Beam Parameters "))
-        print(f"{PREFIX_BEAM} E = {(self.E/10E6):.3e} [MPa]")
-        print(f"{PREFIX_BEAM} I = {self.I:.3e} [m^4]")
-        print(f"{PREFIX_BEAM} L = {self.L:.3f} [m]")
-    
-    def showSingularityString(self, analysis_type=SHEAR):
-        print(self.Singularity.getString())
-    
-    def addAppliedMoment(self, loc, mag, units="N-m"):
-        """
-        CC+  
-        Conversion from 'lb-ft' or 'lbf-ft' to 'N-m'
-        """
-        magNM = mag
-        if units != "N-m":
-            if units == "lb-ft" or units == "lbf-ft":
-                magNM *= CONVERSION_M_TO_SI
-            else:
-                raise Exception(f"{PREFIX_BEAM} invalid units: '{units}'")
-        newMomentLoad = AppliedLoad(loc, mag, MOMENT)
-        self.Singularity.Terms.append(newMomentLoad)
-    
-    def addPointLoad(self, loc, mag, units="N"):
-        """
-        Upward+  
-        Conversion from 'lb' or 'lbf' to 'N'
-        """
-        magN = mag
-        if units != "N":
-            if units == "lb" or units == "lbf":
-                magN *= CONVERSION_F_TO_SI
-            else:
-                raise Exception(f"{PREFIX_BEAM} invalid units: '{units}'")
-        newPointLoad = AppliedLoad(loc, mag, POINT_LOAD)
-        self.Singularity.Terms.append(newPointLoad)
-    
-    def addDistributedLoad(self, start, stop, mag, units="N/m"):
-        """
-        Beams do not enable gravity by default  
-        Conversion from 'lb/ft' or 'lbf/ft' to 'N/m'
-        """
-        magNpM = mag
-        if units != "N/m":
-            if units == "lb/ft" or units == "lbf/ft":
-                magNpM *= CONVERSION_D_TO_SI
-            else:
-                raise Exception(f"{PREFIX_BEAM} invalid units: '{units}'")
-        if stop < start:
-            raise Exception(f"{PREFIX_BEAM} invalid start/stop: '{start}/{stop}'")
+
+        if crossSection is not None:
+            self.CrossSection = crossSection
+            self.I = crossSection.getI()
+        elif i is not None:
+            self.CrossSection = CrossSection(CrossSectionTypes.CIRC, radius=1)
+            self.I = i
+        else:
+            raise Exception("Unable to determine Moment of Intertia. Either I or a CrossSection is required.")
         
-        # Add counteracting distributed load if terminates before beam length
-        if stop < self.L:
-            counteractingDistLoad = AppliedLoad(stop, -mag, DISTRIBUTED_LOAD)
-            self.Singularity.Terms.append(counteractingDistLoad)
+
+        self.SingularityXY = Singularity(l, e, self.I)
+        self.SingularityXZ = Singularity(l, e, self.I)
         
-        distributedLoad = AppliedLoad(start, mag, DISTRIBUTED_LOAD)
-        self.Singularity.Terms.append(distributedLoad)
+        self.ShearUnits = Unit(UnitTypes.Shear, "[N]")
+        self.MomentUnits = Unit(UnitTypes.Bending, "[N-m]")
+        self.AngleUnits = Unit(UnitTypes.Angle, "[rad]")
+        self.DeflectionUnits = Unit(UnitTypes.Deflection, "[m]")
+
+
+    def addDistributedLoad(self, start, stop, magnitude, angle):
+        """
+        `start` - start distance of the distributed load
+        
+        `stop` - end distance of the distributed load
+        
+        `magnitude` - force of the distributed load
+
+        `angle` - degrees in radians from the XY axis towards the XZ axis
+        """
+        if (start < 0 or self.L < stop or stop <= start):
+            raise Exception(f"invalid start / stop for Distributed Load: {start} / {stop}")
+        
+        rads = angle * (np.pi / 180)
+        xyComp = np.cos(rads)
+        if (xyComp != 0):
+            self.SingularityXY.addAppliedLoad(DistributedLoad(start, stop, xyComp * magnitude))
+        
+        xzComp = np.sin(rads)
+        if (xzComp != 0):
+            self.SingularityXZ.addAppliedLoad(DistributedLoad(start, stop, xzComp * magnitude))
+
+
+    def addPointLoad(self, location, magnitude, angle):
+        """
+        `location` - the distance along the beam to the boundary condition
+
+        `magnitude` - force of the applied load
+
+        `angle` - degrees in radians from the XY axis towards the XZ axis
+        """
+        if (location < 0 or self.L < location):
+            raise Exception(f"invalid location for Point Load: {location}")
+        
+        rads = angle * (np.pi / 180)
+        xyComp = np.cos(rads)
+        if (xyComp != 0):
+            self.SingularityXY.addAppliedLoad(PointLoad(location, xyComp * magnitude))
+        
+        xzComp = np.sin(rads)
+        if (xzComp != 0):
+            self.SingularityXZ.addAppliedLoad(PointLoad(location, xzComp * magnitude))
+
     
-    def addBoundaryCondition(self, loc, bc_type=DEFLECTION, bc_value=0.0):
+    def addAppliedMoment(self, location, magnitude, angle):
         """
-        Beams require 2x BCs to analyze  
-        bc_type can be "angle" or "deflection"  
-        bc_value is typically 0.0
+        `location` - the distance along the beam to the boundary condition
+                
+        `magnitude` - moment
+
+        `angle` - degrees in radians from the XY axis towards the XZ axis
         """
-        bc = BoundaryCondition(loc, bc_type, bc_value)
-        self.Singularity.BoundaryConditions.append(bc)
+        if (location < 0 or self.L < location):
+            raise Exception(f"invalid location for Applied Moment: {location}")
+        
+        rads = angle * (np.pi / 180)
+        xyComp = np.cos(rads)
+        if (xyComp != 0):
+            self.SingularityXY.addAppliedLoad(Moment(location, xyComp * magnitude))
+        
+        xzComp = np.sin(rads)
+        if (xzComp != 0):
+            self.SingularityXZ.addAppliedLoad(Moment(location, xzComp * magnitude))
 
-    def getAnalysis(self, n=10**3, showAnalysisLog=True):
+
+    def addBoundaryCondition(self, location, boundaryConditionType, boundaryConditionValue):
         """
-        Returns tuple of analysis, all with len=n:  
-            x       [0, L]  
-            beam    0s  
-            shear  
-            moment  
-            angle  
-            deflection
+        `location` - the distance along the beam to the boundary condition
+
+        `boundaryConditionType` - the type of the boundary condition. e.g: ANGLE, DEFLECTION
+
+        `boundaryConditionValue` - the value of the boundary condition, typically 0
         """
-        x_vals = np.linspace(0, self.L, num=n)
-        beam = np.zeros(n)
-        shear = self.Singularity.getAnalysis(x_vals, SHEAR, showAnalysisLog=showAnalysisLog)
-        moment = self.Singularity.getAnalysis(x_vals, MOMENT, showAnalysisLog=showAnalysisLog)
-        angle = self.Singularity.getAnalysis(x_vals, ANGLE, showAnalysisLog=showAnalysisLog)
-        deflection = self.Singularity.getAnalysis(x_vals, DEFLECTION, showAnalysisLog=showAnalysisLog)
-
-        analysis_results = (x_vals, beam, shear, moment, angle, deflection)
-        return analysis_results
+        if (location < 0 or self.L < location):
+            raise Exception(f"invalid location for Boundary Condition: {location}")
         
-    def analyze(self, showAnalysisLog=True):
-        """Plots deflections and reports max values from analysis"""       
+        self.SingularityXY.addBoundaryCondition(BoundaryCondition(location, boundaryConditionType, boundaryConditionValue))
+        self.SingularityXZ.addBoundaryCondition(BoundaryCondition(location, boundaryConditionType, boundaryConditionValue))
+    
 
-        # if len(self.BoundaryConditions) < 2:
-        #     raise Exception(f"{ERROR_PREFIX_BEAM} cannot run analysis without 2 boundary conditions")
-        if showAnalysisLog:
-            print("\n{:*^150}".format(" Analysis "))
-        analysis = self.getAnalysis(showAnalysisLog=showAnalysisLog)
-        x = analysis[0]
-        beam = analysis[1]
-        shear = analysis[2]
-        moment = analysis[3]
-        angle = analysis[4]
-        deflection = analysis[5]
+    def runAnalysis(self, n=10**3):
+        """
+        `n` - optional number of data points to run the analysis, default is 10^3
+        """
+        pre = "[BEAM ANALYSIS] - "
+        print(f"{pre}Running analysis with beam parameters:")
+        bL = "length:"
+        bE = "Young's modulus of material:"
+        bI = "Moment of inertia:"
+        print(f"{pre}{bL:30} {self.L}")
+        print(f"{pre}{bE:30} {self.E}")
+        print(f"{pre}{bI:30} {self.I}")
 
-        # Get maximum values
-        max_shear = PointValuePair(0, 0.0, '[N]')
-        max_moment = PointValuePair(0, 0.0, '[N-m]')
-        max_angle = PointValuePair(0, 0.0, '[rad]')
-        max_deflection = PointValuePair(0, 0.0, '[m]')
-        for i in range(len(x)):
-            if abs(shear[i]) > abs(max_shear.Value):
-                max_shear.Value = shear[i]
-                max_shear.Point = x[i]
-            if abs(moment[i]) > abs(max_moment.Value):
-                max_moment.Value = moment[i]
-                max_moment.Point = x[i]
-            if abs(angle[i]) > abs(max_angle.Value):
-                max_angle.Value = angle[i]
-                max_angle.Point = x[i]
-            if abs(deflection[i]) > abs(max_deflection.Value):
-                max_deflection.Value = deflection[i]
-                max_deflection.Point = x[i]
+        # =================================== #
+        # = Solve for Singularity Constants = *
+        # =================================== #
+        self.SingularityXY.solve()
+        xySingularities = [
+            self.SingularityXY.getString(BeamAnalysisTypes.SHEAR),
+            self.SingularityXY.getString(BeamAnalysisTypes.BENDING),
+            self.SingularityXY.getString(BeamAnalysisTypes.ANGLE),
+            self.SingularityXY.getString(BeamAnalysisTypes.DEFLECTION)
+        ]
+
+        self.SingularityXZ.solve()
+        xzSingularities = [
+            self.SingularityXZ.getString(BeamAnalysisTypes.SHEAR),
+            self.SingularityXZ.getString(BeamAnalysisTypes.BENDING),
+            self.SingularityXZ.getString(BeamAnalysisTypes.ANGLE),
+            self.SingularityXZ.getString(BeamAnalysisTypes.DEFLECTION)
+        ]
+
+        # determine if there is any anlaysis to run
+        hasXY = not all(s == "" for s in xySingularities)
+        hasXZ = not all(s == "" for s in xzSingularities)
+        if not (hasXY or hasXZ):
+            print("No analysis available in XY or XZ.")
+            print("Quitting...")
+            quit()
         
-        # Plotting
-        fig, ax = plt.subplots(2, 2, sharex="all")
 
-        xlabel = f"length (m)"
-        t1 = f"Shear (N)"
-        ax[0,0].plot(x, beam, '--k')
-        ax[0,0].plot(x, shear, '-b', label=t1)
-        ax[0,0].set(title=t1)
+        # =================================== #
+        # ========== Beam Results =========== #
+        # =================================== #
+        xVals = np.linspace(0, self.L, n)
+        xyShear, xyBending, xyAngle, xyDeflection = [], [], [], []
+        xzShear, xzBending, xzAngle, xzDeflection = [], [], [], []
+        for x in xVals:
+            xyShear.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.SHEAR))
+            xyBending.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.BENDING))
+            xyAngle.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.ANGLE))
+            xyDeflection.append(self.SingularityXY.evaluateAt(x, BeamAnalysisTypes.DEFLECTION))
 
-        t2 = f"Moment (N-m)"
-        ax[1,0].plot(x, beam, '--k')
-        ax[1,0].plot(x, moment, '-r', label=t2)
-        ax[1,0].set(xlabel=xlabel, title=t2)
-
-        t3 = f"Angle (rad)"
-        ax[0,1].plot(x, beam, '--k')
-        ax[0,1].plot(x, angle, '-y', label=t3)
-        ax[0,1].set(title=t3)
-
-        t4 = f"Deflection (m)"
-        ax[1,1].plot(x, beam, '--k')
-        ax[1,1].plot(x, deflection, '-g')
-        ax[1,1].set(xlabel=xlabel, title=t4)
-
-        fig.tight_layout()
+            xzShear.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.SHEAR))
+            xzBending.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.BENDING))
+            xzAngle.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.ANGLE))
+            xzDeflection.append(self.SingularityXZ.evaluateAt(x, BeamAnalysisTypes.DEFLECTION))
         
-        # Report
-        if abs(max_shear.Value) > 1000:
-            max_shear.Value /= 1000
-            max_shear.Units = "[kN]"
-        if abs(max_moment.Value) > 1000:
-            max_moment.Value /= 1000
-            max_moment.Units = "[kN-m]"
-        
-        print("\n{:*^80}".format(" Report "))
-        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max shear:", max_shear.getString()))
-        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max moment:", max_moment.getString()))
-        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max angle:", max_angle.getString()))
-        print(f"{PREFIX_BEAM}" + " {:<20}{:>20}".format("Max deflection:", max_deflection.getString()))
-        print()
 
+        # =================================== #
+        # ============= Report ============== #
+        # =================================== #
+        pre_solving = "[SOLVING] - "
+        mS = "Max Shear:"
+        mM = "Max Moment:"
+        mA = "Max Angle:"
+        mD = "Max Deflection:"
+        sep = f"# {'='*max(len(xySingularities[3]), len(xzSingularities[3]))} #"
+        
+        # digits to round to
+        rdSh = 3
+        rdB = 3
+        rdA = 5
+        rdD = 5
+
+        # singularity constants
+        if hasXY:
+            print(sep)
+            print(f"{pre}{pre_solving}Solved for xy angle constant C1 = {self.SingularityXY.C1}")
+            print(f"{pre}{pre_solving}Solved for xy deflection constant C2 = {self.SingularityXY.C2}")
+        if hasXZ:
+            print(sep)
+            print(f"{pre}{pre_solving}Solved for xz angle constant C1 = {self.SingularityXZ.C1}")
+            print(f"{pre}{pre_solving}Solved for xz deflection constant C2 = {self.SingularityXZ.C2}")
+        
+        # singularity functions
+        if hasXY:
+            print(sep)
+            print(f"{pre}Singularity functions in XY:")
+            for s in xySingularities:
+                print(s)
+        if hasXZ:
+            print(sep)
+            print(f"{pre}Singularity functions in XZ:")
+            for s in xzSingularities:
+                print(s)
+        
+        # report of values of interest (maxs)
+        if hasXY:
+            print(sep)
+            print(f"{pre}Report in XY:")
+            print(f"{mS:20} {utils.getAbsMax(xyShear, rdSh):10} {self.ShearUnits.Label}")
+            print(f"{mM:20} {utils.getAbsMax(xyBending, rdB):10} {self.MomentUnits.Label}")
+            print(f"{mA:20} {utils.getAbsMax(xyAngle, rdA):10} {self.AngleUnits.Label}")
+            print(f"{mD:20} {utils.getAbsMax(xyDeflection, rdD):10} {self.DeflectionUnits.Label}")
+        if hasXZ:
+            print(sep)
+            print(f"{pre}Report in XZ:")
+            print(f"{mS:20} {utils.getAbsMax(xzShear, rdSh):10} {self.ShearUnits.Label}")
+            print(f"{mM:20} {utils.getAbsMax(xzBending, rdB):10} {self.MomentUnits.Label}")
+            print(f"{mA:20} {utils.getAbsMax(xzAngle, rdA):10} {self.AngleUnits.Label}")
+            print(f"{mD:20} {utils.getAbsMax(xzDeflection, rdD):10} {self.DeflectionUnits.Label}")
+        
+        # done w console ouput
+        print(sep)
+
+        # Show plots of XY/XZ params & final beam deflection
+        self.showPlots(xVals, (xyShear, xyBending, xyAngle, xyDeflection), (xzShear, xzBending, xzAngle, xzDeflection))
+
+    
+    def showPlots(self, xVals, xyParams, xzParams, w=12, h=6):
+        """
+        Makes plots of beam params and a 3d plot of final beam deflection.
+
+        `xVals` - a linspace of points along the beam (x-axis)
+
+        `xyParams` - a tuple of singularity values in xy: (xyShear, xyBending, xyAngle, xyDeflection)
+
+        `xzParams` - a tuple of singularity values in xz: (xzShear, xzBending, xzAngle, xzDeflection)
+        """
+        """
+        PLOT LAYOUT
+        |    XY      |     XZ     |     3D Plot       |
+        |   Shear    |   Shear    |    |  /           |
+        |  Bending   |  Bending   |    | /            |
+        |   Angle    |   Angle    |    |/__________   |
+        | Deflection | Deflection |   /|              |
+        """
+        # Main Fig -> 1x2 figs (2D/3D)
+        # Left Fig -> 2x4 figs (XY/XZ plots)
+        # Right Fig -> 1x1 fig (3D plot)
+        fig_main = plt.figure(figsize=(w, h))
+        fig_main.suptitle("Beam Analysis Results")
+        
+        fig_left, fig_right = fig_main.subfigures(nrows=1, ncols=2)
+        fig_left.suptitle("2D")
+        fig_right.suptitle("3D")
+
+        # =================================== #
+        # ============ 2D Plots ============= #
+        # =================================== #
+        ax2d = fig_left.subplots(4, 2, sharex='col', sharey='row')
+        ax2d[0, 0].set_title("XY Plane")
+        ax2d[0, 1].set_title("XZ Plane")
+
+        # std plot params
+        n = len(xVals)
+        axis0 = [0]*n
+
+        # plot styles
+        beamStyle = 'k--'
+        shearStyle = 'b-'
+        bendingStyle = 'r-'
+        angleStyle = 'y-'
+        deflectionStyle = 'g-'
+        
+        # plot Shear, Bending, Angle, and Deflection in 2D
+        # XY on left, XZ on right
+        ax2d[0, 0].set_ylabel(f"Shear {self.ShearUnits.Label}")
+        ax2d[0, 0].plot(xVals, axis0, beamStyle)
+        ax2d[0, 0].plot(xVals, xyParams[0], shearStyle)
+        
+        ax2d[1, 0].set_ylabel(f"Bending {self.MomentUnits.Label}")
+        ax2d[1, 0].plot(xVals, axis0, beamStyle)
+        ax2d[1, 0].plot(xVals, xyParams[1], bendingStyle)
+        
+        ax2d[2, 0].set_ylabel(f"Angle {self.AngleUnits.Label}")
+        ax2d[2, 0].plot(xVals, axis0, beamStyle)
+        ax2d[2, 0].plot(xVals, xyParams[2], angleStyle)
+
+        ax2d[3, 0].set_ylabel(f"Deflection {self.DeflectionUnits.Label}")
+        ax2d[3, 0].plot(xVals, axis0, beamStyle)
+        ax2d[3, 0].plot(xVals, xyParams[3], deflectionStyle)
+
+        ax2d[0, 1].plot(xVals, axis0, beamStyle)
+        ax2d[0, 1].plot(xVals, xzParams[0], shearStyle)
+
+        ax2d[1, 1].plot(xVals, axis0, beamStyle)
+        ax2d[1, 1].plot(xVals, xzParams[1], bendingStyle)
+
+        ax2d[2, 1].plot(xVals, axis0, beamStyle)
+        ax2d[2, 1].plot(xVals, xzParams[2], angleStyle)
+
+        ax2d[3, 1].plot(xVals, axis0, beamStyle)
+        ax2d[3, 1].plot(xVals, xzParams[3], deflectionStyle)
+
+        fig_left.align_ylabels()
+
+        
+        # =================================== #
+        # ============ 3D Plot ============== #
+        # =================================== #
+        ax3d = fig_right.add_subplot(111, projection='3d')
+
+        # convention is that y is vertical in 2d and z is vertical in 3d, 
+        # so swap to keep consistent feel across both
+        ax3d.set_xlabel("X")
+        ax3d.set_ylabel("Z")
+        ax3d.set_zlabel("Y")
+        
+        # calculate beam center coordinates
+        # dict format { x = [y, z] }
+        yzDeflectionByX = {}
+        for i in range(n):
+            yzDeflectionByX[xVals[i]] = [xyParams[3][i], xzParams[3][i]]
+        
+        # add beam mesh coordinates
+        beam3d = [[], [], []]
+        for ix in range(n):
+            if ix % 5 == 0:
+                xVal = xVals[ix]
+                yOffset, zOffset = yzDeflectionByX[xVal]
+                x, y, z = self.CrossSection.getPlotPoints(xVal, yOffset, zOffset)
+                beam3d[0].extend(x)
+                beam3d[1].extend(y)
+                beam3d[2].extend(z)
+        
+        # plot beam centerline and cross-sections
+        ax3d.plot(xVals, xzParams[3], xyParams[3], 'k--')
+        ax3d.plot(beam3d[0], beam3d[1], beam3d[2], 'b-', alpha=0.7)
+        
+        # axis lines
+        axMax = self.L/2
+        axPerp = np.linspace(-axMax, axMax, n)
+        ax3d.plot(xVals, axis0, axis0, 'k-')
+        ax3d.plot(axis0, axPerp, axis0, 'k-')
+        ax3d.plot(axis0, axis0, axPerp, 'k-')
+
+        # set axis scale
+        ax3d.set_xlim(0, self.L)
+        ax3d.set_ylim(-axMax, axMax)
+        ax3d.set_zlim(-axMax, axMax)
+
+        # size to fit ylabels on left
+        plt.subplots_adjust(left=0.2, right=0.9)
         plt.show()
