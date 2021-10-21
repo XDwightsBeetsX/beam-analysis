@@ -8,7 +8,7 @@
 
 Perform engineering analysis on beams with diagrams for shear, moments, angle, and deflection  
 
-## Usage
+## Usage 💻
 
 ```shell
 pip install beam_analysis
@@ -18,23 +18,23 @@ pip install beam_analysis
 git clone https://github.com/XDwightsBeetsX/beam-analysis
 ```
 
-***Check out some demos [here](docs/demos.md)!***
+## Mechanical Requirements ⚙️⚠️
 
-***If you run into usage problems, double check the [requirements.txt](requirements.txt)***
-
-## Mechanical Requirements
-
-- Currently reactions are not solved for... :caution:
-  - *All loads and reactions must be inputted*
-- Boundary conditions currently required:
-  - one angle *AND* one deflection parameter
+- Currently reactions are not solved for...
+  - All loads and reactions must be inputted
+- Boundary conditions currently required
+  - one angle *AND* one deflection value
   - *OR* two deflection parameters
 - Beam weight is not accounted for by default
   - represent it with a distributed load
 
-## Continuous development using `twine`
+***Check out some demos [here 📂](docs/demos.md)!***
 
-This project is maintained on PYPI via releases through twine...
+***If you run into usage problems, double check the [requirements.txt 🔐](requirements.txt)***
+
+## Continuous development using `twine` 👷🛠️
+
+This project is maintained on [PYPI](https://pypi.org/project/beam-analysis/) via releases through twine...
 
 ```shell
 python setup.py sdist bdist_wheel
