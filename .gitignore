@@ -1,10 +1,6 @@
-# APIs
-pypi_test_key.txt
-pypi_key.txt
-
 # Dist and Build for packaging
-dist
-build
+.dist
+.build
 .egg-info
 
 # Editors
