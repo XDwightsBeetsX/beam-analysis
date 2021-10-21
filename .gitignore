@@ -1,6 +1,6 @@
 # Dist and Build for packaging
-dist
-build
+*.dist
+*.build
 *.egg-info
 
 # Editors
