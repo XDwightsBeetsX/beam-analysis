@@ -34,7 +34,7 @@ class Beam(object):
             self.CrossSection = crossSection
             self.I = crossSection.getI()
         elif i is not None:
-            self.CrossSection = CrossSection(CrossSectionTypes.CIRC, radius=1)
+            self.CrossSection = CrossSection(CrossSectionTypes.CIRC, dims=[1])
             self.I = i
         else:
             raise Exception("Unable to determine Moment of Intertia. Either I or a CrossSection is required.")
