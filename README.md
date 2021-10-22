@@ -28,7 +28,7 @@ git clone https://github.com/XDwightsBeetsX/beam-analysis
 - Beam weight is not accounted for by default
   - represent it with a distributed load
 
-***Check out some demos [here 📂](docs/demos.md)!***
+***Check out some demos [here 📂](beam_analysis/docs/demos.md)!***
 
 ***If you run into usage problems, double check the [requirements.txt 🔐](requirements.txt)***
 

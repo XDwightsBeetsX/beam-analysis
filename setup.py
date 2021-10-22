@@ -7,7 +7,7 @@ PKGNAME = "beam_analysis"
 # VERSION - CHANGE BEFORE RUNNING, PYPI WILL NOT UPLOAD
 release = 2
 feature = 1
-update = 1
+update = 2
 V = f"{release}.{feature}.{update}"
 print(f"[LOG] - Executing into version {V}")
 
@@ -48,6 +48,7 @@ with open(REQUIREMENTS_PATH, "r", encoding="utf-8") as req:
             REQUIREMENTS.append(line.strip())
     print(f"[LOG] - Found '{REQUIREMENTS_FILENAME}'")
 
+print("[LOG] - executing setup...")
 # SETUP
 setup(
     name=PKGNAME,
@@ -60,11 +61,11 @@ setup(
     license="MIT",
     keywords=KEYWORDS,
     classifiers=[
-        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",
     ],
     install_requires=REQUIREMENTS,
-    packages=find_packages(exclude=("tests",)),
+    packages=find_packages(PKGNAME, "tests"),
     python_requires='>=3.6',
 )
+print("[LOG] - done.")

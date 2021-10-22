@@ -1,6 +1,6 @@
 # Required packages
 numpy
-matplotlib==3.4.3
+matplotlib
 
 # Testing
 pytest
