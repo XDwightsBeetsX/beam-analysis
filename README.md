@@ -18,7 +18,7 @@ pip install beam_analysis
 git clone https://github.com/XDwightsBeetsX/beam-analysis
 ```
 
-***Check out some demos [here](docs/demos.md)!***
+***Check out some demos [here](beam_analysis/docs/demos.md)!***
 
 ***If you run into usage problems, double check the [requirements.txt](requirements.txt)***
 
