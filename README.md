@@ -5,6 +5,7 @@
 [![Build Status](https://app.travis-ci.com/XDwightsBeetsX/beam-analysis.svg?branch=master)](https://app.travis-ci.com/XDwightsBeetsX/beam-analysis)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/XDwightsBeetsX/beam_analysis.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/XDwightsBeetsX/beam_analysis/context:python)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/XDwightsBeetsX/beam_analysis.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/XDwightsBeetsX/beam_analysis/alerts/)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FXDwightsBeetsX%2Fbeam-analysis&count_bg=%233D75C8&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=views&edge_flat=false)](https://hits.seeyoufarm.com)
 
 Perform engineering analysis on beams with diagrams for shear, moments, angle, and deflection  
 
