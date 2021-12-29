@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -129,12 +130,13 @@ class Beam(object):
         self.SingularityXZ.addBoundaryCondition(BoundaryCondition(location, boundaryConditionType, boundaryConditionValue))
     
 
-    def runAnalysis(self, n=10**3):
+    def runAnalysis(self, n=10**3, showPlots=True, outputToFile=False):
         """
         `n` - optional number of data points to run the analysis, default is 10^3
         """
         pre = "[BEAM ANALYSIS] - "
         print(f"{pre}Running analysis with beam parameters:")
+        
         bL = "length:"
         bE = "Young's modulus of material:"
         bI = "Moment of inertia:"
@@ -228,25 +230,98 @@ class Beam(object):
         
         # report of values of interest (maxs)
         if hasXY:
+            mSxy = utils.getAbsMax(xyShear, rdSh)
+            mBxy = utils.getAbsMax(xyBending, rdB)
+            mAxy = utils.getAbsMax(xyAngle, rdA)
+            mDxy = utils.getAbsMax(xyDeflection, rdD)
+
             print(sep)
             print(f"{pre}Report in XY:")
-            print(f"{mS:20} {utils.getAbsMax(xyShear, rdSh):10} {self.ShearUnits.Label}")
-            print(f"{mM:20} {utils.getAbsMax(xyBending, rdB):10} {self.MomentUnits.Label}")
-            print(f"{mA:20} {utils.getAbsMax(xyAngle, rdA):10} {self.AngleUnits.Label}")
-            print(f"{mD:20} {utils.getAbsMax(xyDeflection, rdD):10} {self.DeflectionUnits.Label}")
+            print(f"{mS:20} {mSxy:10} {self.ShearUnits.Label}")
+            print(f"{mM:20} {mBxy:10} {self.MomentUnits.Label}")
+            print(f"{mA:20} {mAxy:10} {self.AngleUnits.Label}")
+            print(f"{mD:20} {mDxy:10} {self.DeflectionUnits.Label}")
         if hasXZ:
+            mSxz = utils.getAbsMax(xzShear, rdSh)
+            mBxz = utils.getAbsMax(xzBending, rdB)
+            mAxz = utils.getAbsMax(xzAngle, rdA)
+            mDxz = utils.getAbsMax(xzDeflection, rdD)
+
             print(sep)
             print(f"{pre}Report in XZ:")
-            print(f"{mS:20} {utils.getAbsMax(xzShear, rdSh):10} {self.ShearUnits.Label}")
-            print(f"{mM:20} {utils.getAbsMax(xzBending, rdB):10} {self.MomentUnits.Label}")
-            print(f"{mA:20} {utils.getAbsMax(xzAngle, rdA):10} {self.AngleUnits.Label}")
-            print(f"{mD:20} {utils.getAbsMax(xzDeflection, rdD):10} {self.DeflectionUnits.Label}")
+            print(f"{mS:20} {mSxz:10} {self.ShearUnits.Label}")
+            print(f"{mM:20} {mBxz:10} {self.MomentUnits.Label}")
+            print(f"{mA:20} {mAxz:10} {self.AngleUnits.Label}")
+            print(f"{mD:20} {mDxz:10} {self.DeflectionUnits.Label}")
         
         # done w console ouput
         print(sep)
 
         # Show plots of XY/XZ params & final beam deflection
-        self.showPlots(xVals, (xyShear, xyBending, xyAngle, xyDeflection), (xzShear, xzBending, xzAngle, xzDeflection))
+        if showPlots:
+            print(f"{pre}generating beam plots...")
+            xyParams = (xyShear, xyBending, xyAngle, xyDeflection)
+            xzParams = (xzShear, xzBending, xzAngle, xzDeflection)
+            self.showPlots(xVals, xyParams, xzParams)
+            print(f"done.")
+        
+        if outputToFile:
+            outputFolderName = "beam-analysis-results"
+            if not os.path.exists(outputFolderName):
+                os.makedirs(outputFolderName)
+
+            print(f"{pre}outputting to file in {outputFolderName}/...")
+            filename = outputFolderName + "/" + f"beam-analysis-results-l{self.L}-cs{self.CrossSection.CrossSectionType.name}".replace('.', '_') + ".csv"
+            with open(filename, 'w') as resultsFile:
+                resultsFile.write("Beam Analysis Results\n")
+                
+                resultsFile.write("\n")
+                
+                resultsFile.write("Beam\n")
+                resultsFile.write(f"length:, {self.L}\n")
+                resultsFile.write(f"cross-section:, {self.CrossSection.CrossSectionType.name}\n")
+                resultsFile.write(f"E:, {self.E}\n")
+                resultsFile.write(f"I:, {self.I}\n") 
+                
+                resultsFile.write("\n")
+
+                if hasXY:
+                    resultsFile.write("Applied Loads in XY\n")
+                    resultsFile.write("Load Type, Start, Stop, Magnitude\n")
+                    for load in self.SingularityXY.AppliedLoads:
+                        if isinstance(load, DistributedLoad):
+                            resultsFile.write(f"{load.AppliedLoadType.name}, {load.Start}, {load.Stop}, {load.Magnitude}\n")
+                        else:
+                            resultsFile.write(f"{load.AppliedLoadType.name}, {load.Location}, N/A, {load.Magnitude}\n")
+                    resultsFile.write("\n")
+                
+                if hasXZ:
+                    resultsFile.write("Applied Loads in XZ\n")
+                    resultsFile.write("Load Type, Start, Stop, Magnitude\n")
+                    for load in self.SingularityXZ.AppliedLoads:
+                        if isinstance(load, DistributedLoad):
+                            resultsFile.write(f"{load.AppliedLoadType.name}, {load.Start}, {load.Stop}, {load.Magnitude}\n")
+                        else:
+                            resultsFile.write(f"{load.AppliedLoadType.name}, {load.Location}, N/A, {load.Magnitude}\n")
+                    resultsFile.write("\n")
+
+                if hasXY:
+                    resultsFile.write("XY Plane\n")
+                    resultsFile.write(f"{mS}, {mSxy}\n")
+                    resultsFile.write(f"{mM}, {mBxy}\n")
+                    resultsFile.write(f"{mA}, {mAxy}\n")
+                    resultsFile.write(f"{mD}, {mDxy}\n")
+                    resultsFile.write("\n")
+                
+                if hasXZ:
+                    resultsFile.write("XZ Plane\n")
+                    resultsFile.write(f"{mS}, {mSxz}\n")
+                    resultsFile.write(f"{mM}, {mBxz}\n")
+                    resultsFile.write(f"{mA}, {mAxz}\n")
+                    resultsFile.write(f"{mD}, {mDxz}\n")
+                    resultsFile.write("\n")
+            print(f"done.")
+        
 
     
     def showPlots(self, xVals, xyParams, xzParams, w=12, h=6):
