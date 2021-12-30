@@ -25,6 +25,7 @@ if __name__ == "__main__":
     CS = CrossSection(CrossSectionTypes.CIRC, [.01])
     B = Beam(L, E, crossSection=CS)
 
+    
     # =================================== #
     #    2. Add Loads                     #
     # =================================== #
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     B.addPointLoad(L, 11, 45)
     B.addDistributedLoad(0, L, -2, 45)
 
+
     # =================================== #
     #    3. Input Boundary Conditions     #
     # =================================== #
@@ -48,6 +50,7 @@ if __name__ == "__main__":
     # =================================== #
     B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0)
     B.addBoundaryCondition(L, BoundaryConditionTypes.DEFLECTION, 0)
+
 
     # =================================== #
     #    4. Run Analysis                  #

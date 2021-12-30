@@ -241,6 +241,7 @@ class Beam(object):
             print(f"{mM:20} {mBxy:10} {self.MomentUnits.Label}")
             print(f"{mA:20} {mAxy:10} {self.AngleUnits.Label}")
             print(f"{mD:20} {mDxy:10} {self.DeflectionUnits.Label}")
+        
         if hasXZ:
             mSxz = utils.getAbsMax(xzShear, rdSh)
             mBxz = utils.getAbsMax(xzBending, rdB)
@@ -320,8 +321,7 @@ class Beam(object):
                     resultsFile.write(f"{mA}, {mAxz}\n")
                     resultsFile.write(f"{mD}, {mDxz}\n")
                     resultsFile.write("\n")
-            print(f"done.")
-        
+            print(f"done.")  
 
     
     def showPlots(self, xVals, xyParams, xzParams, w=12, h=6):
