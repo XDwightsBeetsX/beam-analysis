@@ -1,7 +1,4 @@
 # Required packages
-os
-enum
-
 numpy
 matplotlib
 
