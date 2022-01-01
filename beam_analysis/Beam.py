@@ -206,29 +206,33 @@ class Beam(object):
         rdA = 5
         rdD = 5
 
-        # singularity constants
+        # write singularity constants in XY to console
         if hasXY:
             print(sep)
             print(f"{pre}{pre_solving}Solved for xy angle constant C1 = {self.SingularityXY.C1}")
             print(f"{pre}{pre_solving}Solved for xy deflection constant C2 = {self.SingularityXY.C2}")
+        
+        # write singularity constants in XZ to console
         if hasXZ:
             print(sep)
             print(f"{pre}{pre_solving}Solved for xz angle constant C1 = {self.SingularityXZ.C1}")
             print(f"{pre}{pre_solving}Solved for xz deflection constant C2 = {self.SingularityXZ.C2}")
         
-        # singularity functions
+        # write singularities in XY to console
         if hasXY:
             print(sep)
             print(f"{pre}Singularity functions in XY:")
             for s in xySingularities:
                 print(s)
+        
+        # write singularities in XZ to console
         if hasXZ:
             print(sep)
             print(f"{pre}Singularity functions in XZ:")
             for s in xzSingularities:
                 print(s)
         
-        # report of values of interest (maxs)
+        # write max vals in XY to console
         if hasXY:
             mSxy = utils.getAbsMax(xyShear, rdSh)
             mBxy = utils.getAbsMax(xyBending, rdB)
@@ -241,6 +245,8 @@ class Beam(object):
             print(f"{mM:20} {mBxy:10} {self.MomentUnits.Label}")
             print(f"{mA:20} {mAxy:10} {self.AngleUnits.Label}")
             print(f"{mD:20} {mDxy:10} {self.DeflectionUnits.Label}")
+        
+        # write max vals in XZ to console
         if hasXZ:
             mSxz = utils.getAbsMax(xzShear, rdSh)
             mBxz = utils.getAbsMax(xzBending, rdB)
@@ -265,13 +271,18 @@ class Beam(object):
             self.showPlots(xVals, xyParams, xzParams)
             print(f"done.")
         
+        # if desired, output results to .csv file
         if outputToFile:
+            # if the output folder doesnt exist, create it
             outputFolderName = "beam-analysis-results"
             if not os.path.exists(outputFolderName):
                 os.makedirs(outputFolderName)
-
+            
+            # generate filename from beam params
             print(f"{pre}outputting to file in {outputFolderName}/...")
             filename = outputFolderName + "/" + f"beam-analysis-results-l{self.L}-cs{self.CrossSection.CrossSectionType.name}".replace('.', '_') + ".csv"
+            
+            # write the mS, mB, mA, MD vals for XY and XZ as well as some beam params
             with open(filename, 'w') as resultsFile:
                 resultsFile.write("Beam Analysis Results\n")
                 
@@ -285,6 +296,7 @@ class Beam(object):
                 
                 resultsFile.write("\n")
 
+                # loads in XY
                 if hasXY:
                     resultsFile.write("Applied Loads in XY\n")
                     resultsFile.write("Load Type, Start, Stop, Magnitude\n")
@@ -295,6 +307,7 @@ class Beam(object):
                             resultsFile.write(f"{load.AppliedLoadType.name}, {load.Location}, N/A, {load.Magnitude}\n")
                     resultsFile.write("\n")
                 
+                # loads in XZ
                 if hasXZ:
                     resultsFile.write("Applied Loads in XZ\n")
                     resultsFile.write("Load Type, Start, Stop, Magnitude\n")
@@ -304,24 +317,25 @@ class Beam(object):
                         else:
                             resultsFile.write(f"{load.AppliedLoadType.name}, {load.Location}, N/A, {load.Magnitude}\n")
                     resultsFile.write("\n")
-
+                
+                # max vals in XY
                 if hasXY:
                     resultsFile.write("XY Plane\n")
-                    resultsFile.write(f"{mS}, {mSxy}\n")
-                    resultsFile.write(f"{mM}, {mBxy}\n")
-                    resultsFile.write(f"{mA}, {mAxy}\n")
-                    resultsFile.write(f"{mD}, {mDxy}\n")
+                    resultsFile.write(f"{mS} {self.ShearUnits}, {mSxy}\n")
+                    resultsFile.write(f"{mM} {self.MomentUnits}, {mBxy}\n")
+                    resultsFile.write(f"{mA} {self.AngleUnits}, {mAxy}\n")
+                    resultsFile.write(f"{mD} {self.DeflectionUnits}, {mDxy}\n")
                     resultsFile.write("\n")
                 
+                # max vals in XZ
                 if hasXZ:
                     resultsFile.write("XZ Plane\n")
-                    resultsFile.write(f"{mS}, {mSxz}\n")
-                    resultsFile.write(f"{mM}, {mBxz}\n")
-                    resultsFile.write(f"{mA}, {mAxz}\n")
-                    resultsFile.write(f"{mD}, {mDxz}\n")
+                    resultsFile.write(f"{mS} {self.ShearUnits}, {mSxz}\n")
+                    resultsFile.write(f"{mM} {self.MomentUnits}, {mBxz}\n")
+                    resultsFile.write(f"{mA} {self.AngleUnits}, {mAxz}\n")
+                    resultsFile.write(f"{mD} {self.DeflectionUnits}, {mDxz}\n")
                     resultsFile.write("\n")
-            print(f"done.")
-        
+            print(f"done.")  
 
     
     def showPlots(self, xVals, xyParams, xzParams, w=12, h=6):

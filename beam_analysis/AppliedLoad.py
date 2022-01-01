@@ -106,7 +106,7 @@ class Moment(AppliedLoad):
     
 
     def evaluateAt(self, x, beamAnalysisType):
-        if not (x <= self.Location):
+        if not (self.Location <= x):
             return 0.0
         if beamAnalysisType == BeamAnalysisTypes.SHEAR:
             return 0.0
