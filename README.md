@@ -11,12 +11,33 @@ Perform engineering analysis on beams with diagrams for shear, moments, angle, a
 
 ## Usage 💻
 
+### Install
+
 ```shell
 pip install beam_analysis
 ```
 
 ```shell
 git clone https://github.com/XDwightsBeetsX/beam-analysis
+```
+
+### Sample Code
+
+```python
+E = 207 * 10**6
+L = 1.0
+CS = CrossSection(CrossSectionTypes.CIRC, [.01])
+B = Beam(L, E, crossSection=CS)
+
+B.addPointLoad(0, 11, 45)
+B.addPointLoad(L/2, -20, 45)
+B.addPointLoad(L, 11, 45)
+B.addDistributedLoad(0, L, -2, 45)
+
+B.addBoundaryCondition(L/2, BoundaryConditionTypes.ANGLE, 0)
+B.addBoundaryCondition(L, BoundaryConditionTypes.DEFLECTION, 0)
+
+B.runAnalysis(outputToFile=True)
 ```
 
 ## Mechanical Requirements ⚙️⚠️
@@ -31,7 +52,7 @@ git clone https://github.com/XDwightsBeetsX/beam-analysis
 
 ***Check out some demos [here 📂](beam_analysis/docs/demos.md)!***
 
-***If you run into usage problems, double check the [requirements.txt 🔐](requirements.txt)***
+***If you run into usage problems, double check the [requirements.txt 📄](requirements.txt)***
 
 ## Continuous development using `twine` 👷🛠️
 
